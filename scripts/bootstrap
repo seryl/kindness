@@ -1,0 +1,219 @@
+#!/usr/bin/env bash
+
+shopt -s extglob
+set -o errtrace
+set -o errexit
+
+log()  { printf "%b\n" "$*" ; return $? ; }
+fail() { log "\nError: $*\n" ; exit 1 ; }
+
+PLATFORM=$(uname)
+RUBY_VERSION='ruby-1.9.3-p125'
+
+usage()
+{
+  printf "%b" "
+Usage:
+
+  bootstrap
+
+"
+}
+
+check_gem_installed()
+{
+  return $(gem list | grep $1 | awk '{ print $1 }')
+}
+
+install_brew()
+{
+  BREW_LOCATION=$(which brew)
+  if [[ $PLATFORM == 'Darwin' ]] && [ -z $BREW_LOCATION ]; then
+    log 'Downloading Homebrew'
+    BREW_URL="https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb"
+    /usr/bin/ruby -e "$(/usr/bin/curl -fksSL $BREW_URL)"
+  fi
+}
+
+install_git()
+{
+  GIT_LOCATION=$(which git)
+  if [ -z $GIT_LOCATION ]; then
+    log 'Downloading Git'
+    brew install git
+  fi
+}
+
+install_rvm()
+{
+  bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+  RVM_STRING="[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && . \"$HOME/.rvm/scripts/rvm\""
+  if [ -z $(cat $HOME/.bash_profile | grep $RVM_STRING) ]; then
+    log 'Setting up rvm profile'
+    echo "$RVM_STRING # Load RVM function" >> $HOME/.bash_profile
+    source $HOME/.bash_profile
+  fi  
+  rvm reload
+}
+
+install_ruby19()
+{
+  RUBY_INSTALLED=$(rvm list | grep $RUBY_VERSION | awk '{ print $2 }')
+  if [ -z RUBY_INSTALLED ]; then
+    log 'Downloading Ruby19'
+    echo "gem: --no-ri --no-rdoc" > ~/.gemrc
+    rvm install $RUBY_VERSION
+  fi
+  
+  RUBY_IS_DEFAULT=$(rvm list | grep "=* $RUBY_VERSION" | awk '{ print $2 }')
+  if [ -z RUBY_IS_DEFAULT ]; then
+    log "Setting rvm default to $RUBY_VERSION"
+    rvm use --default $RUBY_VERSION
+  fi
+}
+
+install_chef()
+{
+  chef_installed=check_gem_installed "chef"
+  if [ -z chef_installed ]; then
+    log 'Downloading Chef'
+    gem install chef
+  fi
+}
+
+install_virtualbox()
+{
+  VBOX_LOCATION=$(which VirtualBox)
+  VBOX_VERSION=$(curl -sL http://download.virtualbox.org/virtualbox/LATEST.TXT)
+  VBOX_MVERSION=$(echo $VBOX_VERSION | awk 'BEGIN { FS="." } ; { print $1"."$2 }' )
+  VBOXURL="http://download.virtualbox.org/virtualbox/$VBOX_VERSION"
+
+  if [[ $PLATFORM == 'Darwin' ]] && [ -z $VBOX_LOCATION ]; then
+    log 'Downloading Virtualbox'
+  	DMG=$(curl -sL $VBOXURL/MD5SUMS | grep dmg | awk 'BEGIN { FS="\*" } ; { print $2 }')
+  	curl -sLO $VBOXURL/$DMG
+  	DMGMOUNT=$(hdiutil attach $DMG | tail -n1 | awk '{ print $3 }')
+  	cd $DMGMOUNT
+  	sudo installer -pkg VirtualBox.mpkg -target "/"
+  	hdiutil detach $DMGMOUNT
+
+  elif [[ $PLATFORM == 'Linux' ]] && [ -z $VBOX_LOCATION ]; then
+    log 'Downloading Virtualbox'
+  	ARCH=$(uname -i)
+  	RPM=$(curl -sL $VBOXURL/MD5SUMS | grep rhel6 | awk 'BEGIN { FS="\*" } ; { print $2 }' | grep $ARCH)
+  	$(curl -sLO $VBOXURL/$RPM)
+  	rpm -i $RPM
+  	rm $RPM
+  fi
+}
+
+install_vagrant()
+{
+  if [ -z check_gem_installed "vagrant" ]; then
+    log 'Downloading Vagrant'
+    gem install vagrant
+  fi
+}
+
+install_veewee()
+{
+  if [ -z check_gem_installed "veewee" ]; then
+    log 'Downloading Veewee'
+    gem install veewee
+  fi
+}
+
+install_lunchy()
+{
+  if [ -z check_gem_installed "lunchy" ]; then
+    log 'Downloading Lunchy'
+    gem install lunchy
+  fi
+}
+
+install_pip()
+{
+  if [ -z $(brew list | grep brew-pip) ]; then
+    log 'Downloading Python-Pip'
+    brew install brew-pip
+  fi
+}
+
+install_virtualenv()
+{
+  VIRTUALENV_INSTALLED=$(pip freeze | grep virtualenv)
+  if [ -z VIRTUALENV_INSTALLED ]; then
+    log 'Installing VirtualEnv'
+    sudo pip install virtualenv > /dev/null
+  fi
+}
+
+install_virtaulenvwrapper()
+{
+  VIRTUALENV_WRAPPER_INSTALLED=$(pip freeze | grep virtualenvwrapper)
+  if [ -z VIRTUALENV_WRAPPER_INSTALLED ]; then
+    log 'Installing VirtualEnv Wrapper'
+    sudo pip install virtualenvwrapper > /dev/null
+  fi
+  
+  if [ ! -d ~/.virtualenvs ]; then
+    mkdir ~/.virtualenvs
+  fi
+  
+  VIRTUALENV_WRAPPER_STRING='source /usr/local/bin/virtualenvwrapper.sh'
+  if [ ! -f ~/.bash_login ]; then
+    echo $VIRTUALENV_WRAPPER_STRING > ~/.bash_login
+    source ~/.bash_login
+  else
+    if [ -z $(cat ~/.bash_login | grep $VIRTUALENV_WRAPPER_STRING) ]; then
+      $VIRTUALENV_WRAPPER_STRING >> ~/.bash_login
+      source ~/.bash_login
+    fi
+  fi
+}
+
+
+get_ready()
+{
+  install_brew
+  install_git
+  install_rvm
+  install_ruby19
+  install_chef
+  install_virtualbox
+  install_veewee
+  install_lunchy
+  install_pip
+  install_virtualenv
+  install_virtualenvwrapper
+}
+
+# Parse CLI arguments.
+while (( $# > 0 ))
+do
+  token="$1"
+  shift
+  
+  case "$token" in
+    (--trace)
+      set -o xtrace
+      export slipstream_trace_flag=1
+      ;;
+    (--debug)
+      export slipstream_debug_flag=1
+      set -o verbose
+      ;;
+    (help|usage)
+      usage
+      exit 0
+      ;;
+    
+    (*)
+      echo "Unrecognized option: $token"
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+get_ready
