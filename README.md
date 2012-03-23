@@ -8,14 +8,5 @@ Sets up your brew, ruby and python environments in a sane manner.
 
 ## Installs
 
-* Homebrew
-* Git
-* rvm
-* Ruby19
-* Chef
-* Virtualbox
-* Veewee
-* Lunchy
-* Pip
-* VirtualEnv
-* VirturalEnv Wrapper
+    Homebrew, Git, rvm, Ruby19, Chef, Virtualbox, Veewee, Lunchy,
+    Pip, VirtualEnv, VirturalEnv Wrapper
