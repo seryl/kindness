@@ -22,7 +22,11 @@ Usage:
 
 check_gem_installed()
 {
-  return $(gem list | grep $1 | awk '{ print $1 }')
+  is_installed=$(gem list | grep $1 | awk '{ print $1 }')
+  if [ -z is_installed ]; then
+    return 0
+  fi
+  return 1
 }
 
 install_brew()
@@ -48,7 +52,7 @@ install_rvm()
 {
   bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
   RVM_STRING="[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && . \"$HOME/.rvm/scripts/rvm\""
-  if [ -z $(cat $HOME/.bash_profile | grep $RVM_STRING) ]; then
+  if [ -z $(cat $HOME/.bash_profile | grep rvm | awk '{ print $1 }') ]; then
     log 'Setting up rvm profile'
     echo "$RVM_STRING # Load RVM function" >> $HOME/.bash_profile
     source $HOME/.bash_profile
@@ -74,8 +78,9 @@ install_ruby19()
 
 install_chef()
 {
-  chef_installed=check_gem_installed "chef"
-  if [ -z chef_installed ]; then
+  check_gem_installed "chef"
+  chef_installed=$!
+  if [ chef_installed -ne 0 ]; then
     log 'Downloading Chef'
     gem install chef
   fi
@@ -109,7 +114,9 @@ install_virtualbox()
 
 install_vagrant()
 {
-  if [ -z check_gem_installed "vagrant" ]; then
+  check_gem_installed "vagrant"
+  vagrant_installed=$!
+  if [ vagrant_installed -ne 0 ]; then
     log 'Downloading Vagrant'
     gem install vagrant
   fi
@@ -117,7 +124,9 @@ install_vagrant()
 
 install_veewee()
 {
-  if [ -z check_gem_installed "veewee" ]; then
+  check_gem_installed "veewee"
+  veewee_installed=$!
+  if [ veewee_installed -ne 0 ]; then
     log 'Downloading Veewee'
     gem install veewee
   fi
@@ -125,7 +134,9 @@ install_veewee()
 
 install_lunchy()
 {
-  if [ -z check_gem_installed "lunchy" ]; then
+  check_gem_installed "lunchy"
+  lunchy_installed=$!
+  if [ lunchy_installed -ne 0 ]; then
     log 'Downloading Lunchy'
     gem install lunchy
   fi
