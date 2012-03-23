@@ -1,6 +1,6 @@
 # Kindness
 
-* http://github.com/seryl/kindness
+* https://github.com/seryl/kindness
 
 A nice way to bootstrap your box (with chef).
 
