@@ -192,6 +192,7 @@ get_ready()
   install_ruby19
   install_chef
   install_virtualbox
+  install_vagrant
   install_veewee
   install_lunchy
   install_pip
