@@ -15,23 +15,31 @@ usage()
   printf "%b" "
 Usage:
 
-  bootstrap
+  ./bootstrap
 
 "
+}
+
+check_if_root()
+{
+  if [[ $USER == "root" ]]; then
+    log "kindness is not meant to be installed with the root user or sudo"
+    exit 0
+  fi
 }
 
 check_gem_installed()
 {
   is_installed=$(gem list | grep $1 | awk '{ print $1 }')
-  if [ -z is_installed ]; then
-    return 0
+  if [ -z $is_installed ]; then
+    return 1
   fi
-  return 1
+  return 0
 }
 
 install_brew()
 {
-  BREW_LOCATION=$(which brew)
+  BREW_LOCATION=$(which brew) || $(cat /dev/null)
   if [[ $PLATFORM == 'Darwin' ]] && [ -z $BREW_LOCATION ]; then
     log 'Downloading Homebrew'
     BREW_URL="https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb"
@@ -41,163 +49,234 @@ install_brew()
 
 install_git()
 {
-  GIT_LOCATION=$(which git)
+  GIT_LOCATION=$(which git) || $(cat /dev/null)
   if [ -z $GIT_LOCATION ]; then
     log 'Downloading Git'
-    brew install git
+    
+    if [[ $PLATFORM == 'Darwin' ]]; then
+      brew install git
+    elif [ -f /etc/redhat-release ]; then
+      sudo yum install -y git
+    elif [ -f /etc/debian_version ]; then
+      sudo aptitude install -y git
+    elif [ -f /etc/mandrake-release ]; then
+      sudo urpmi install -y git
+    elif [ -f /etc/SuSE-release ]; then
+      sudo zipper install -y git
+    fi
   fi
 }
 
 install_rvm()
 {
-  bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer)
+  CURRENT_RVM=$(rvm --version 2> /dev/null| awk '{print $2}' | sed '/^$/d') || $(cat /dev/null)  
+  RVM_VERSION=$(curl -s https://raw.github.com/wayneeseguin/rvm/master/VERSION)
+  if [[ $RVM_VERSION != $CURRENT_RVM ]]; then
+    bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer) > /dev/null 2>&1
+  fi
+  
   RVM_STRING="[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && . \"$HOME/.rvm/scripts/rvm\""
-  if [ -z $(cat $HOME/.bash_profile | grep rvm | awk '{ print $1 }') ]; then
-    log 'Setting up rvm profile'
-    echo "$RVM_STRING # Load RVM function" >> $HOME/.bash_profile
-    source $HOME/.bash_profile
-  fi  
-  rvm reload
+  RVM_PATH='PATH=$PATH:$HOME/.rvm/bin'
+  
+  BASH_RVM_SHELL_RC="$HOME/.bash_profile"
+  case $SHELL in
+    *zsh)
+      RVM_SHELL_RC="$HOME/.zshrc"
+      ;;
+  esac
+  
+  for path in $RVM_SHELL_RC $BASH_RVM_SHELL_RC
+  do
+    if [[ -z $(cat $path | grep rvm | awk '{ print $1 }') ]]; then
+      log 'Setting up rvm profile'
+      echo "$RVM_STRING # Load rvm function" >> $path
+      echo "$RVM_PATH # Add rvm to PATH" >> $path
+      echo "" >> $path
+    fi
+  done
+  
+  if [[ -s "$HOME/.rvm/script/rvm" ]]; then
+    source "$HOME/.rvm/scripts/rvm"
+  fi
 }
 
 install_ruby19()
 {
   RUBY_INSTALLED=$(rvm list | grep $RUBY_VERSION | awk '{ print $2 }')
-  if [ -z RUBY_INSTALLED ]; then
+  if [ -z $RUBY_INSTALLED ]; then
     log 'Downloading Ruby19'
     echo "gem: --no-ri --no-rdoc" > ~/.gemrc
     rvm install $RUBY_VERSION
   fi
   
-  RUBY_IS_DEFAULT=$(rvm list | grep "=* $RUBY_VERSION" | awk '{ print $2 }')
-  if [ -z RUBY_IS_DEFAULT ]; then
+  RUBY_IS_DEFAULT=$(rvm list | grep "=\\* $RUBY_VERSION" | awk '{ print $2 }')
+  if [ -z $RUBY_IS_DEFAULT ]; then
     log "Setting rvm default to $RUBY_VERSION"
-    rvm use --default $RUBY_VERSION
+    ln -sfn "$HOME/.rvm/wrappers/$RUBY_VERSION" "$HOME/.rvm/wrappers/default"
   fi
 }
 
 install_chef()
 {
   check_gem_installed "chef"
-  chef_installed=$!
-  if [ chef_installed -ne 0 ]; then
+  chef_installed=$?
+  if [[ $chef_installed -ne 0 ]]; then
     log 'Downloading Chef'
     gem install chef
   fi
 }
 
-install_virtualbox()
+install_kindness()
 {
-  VBOX_LOCATION=$(which VirtualBox)
-  VBOX_VERSION=$(curl -sL http://download.virtualbox.org/virtualbox/LATEST.TXT)
-  VBOX_MVERSION=$(echo $VBOX_VERSION | awk 'BEGIN { FS="." } ; { print $1"."$2 }' )
-  VBOXURL="http://download.virtualbox.org/virtualbox/$VBOX_VERSION"
-
-  if [[ $PLATFORM == 'Darwin' ]] && [ -z $VBOX_LOCATION ]; then
-    log 'Downloading Virtualbox'
-  	DMG=$(curl -sL $VBOXURL/MD5SUMS | grep dmg | awk 'BEGIN { FS="\*" } ; { print $2 }')
-  	curl -sLO $VBOXURL/$DMG
-  	DMGMOUNT=$(hdiutil attach $DMG | tail -n1 | awk '{ print $3 }')
-  	cd $DMGMOUNT
-  	sudo installer -pkg VirtualBox.mpkg -target "/"
-  	hdiutil detach $DMGMOUNT
-
-  elif [[ $PLATFORM == 'Linux' ]] && [ -z $VBOX_LOCATION ]; then
-    log 'Downloading Virtualbox'
-  	ARCH=$(uname -i)
-  	RPM=$(curl -sL $VBOXURL/MD5SUMS | grep rhel6 | awk 'BEGIN { FS="\*" } ; { print $2 }' | grep $ARCH)
-  	$(curl -sLO $VBOXURL/$RPM)
-  	rpm -i $RPM
-  	rm $RPM
-  fi
-}
-
-install_vagrant()
-{
-  check_gem_installed "vagrant"
-  vagrant_installed=$!
-  if [ vagrant_installed -ne 0 ]; then
-    log 'Downloading Vagrant'
-    gem install vagrant
-  fi
-}
-
-install_veewee()
-{
-  check_gem_installed "veewee"
-  veewee_installed=$!
-  if [ veewee_installed -ne 0 ]; then
-    log 'Downloading Veewee'
-    gem install veewee
-  fi
-}
-
-install_lunchy()
-{
-  check_gem_installed "lunchy"
-  lunchy_installed=$!
-  if [ lunchy_installed -ne 0 ]; then
-    log 'Downloading Lunchy'
-    gem install lunchy
-  fi
-}
-
-install_pip()
-{
-  if [ -z $(brew list | grep brew-pip) ]; then
-    log 'Downloading Python-Pip'
-    brew install brew-pip
-  fi
-}
-
-install_virtualenv()
-{
-  VIRTUALENV_INSTALLED=$(pip freeze | grep virtualenv)
-  if [ -z VIRTUALENV_INSTALLED ]; then
-    log 'Installing VirtualEnv'
-    sudo pip install virtualenv > /dev/null
-  fi
-}
-
-install_virtaulenvwrapper()
-{
-  VIRTUALENV_WRAPPER_INSTALLED=$(pip freeze | grep virtualenvwrapper)
-  if [ -z VIRTUALENV_WRAPPER_INSTALLED ]; then
-    log 'Installing VirtualEnv Wrapper'
-    sudo pip install virtualenvwrapper > /dev/null
-  fi
-  
-  if [ ! -d ~/.virtualenvs ]; then
-    mkdir ~/.virtualenvs
-  fi
-  
-  VIRTUALENV_WRAPPER_STRING='source /usr/local/bin/virtualenvwrapper.sh'
-  if [ ! -f ~/.bash_login ]; then
-    echo $VIRTUALENV_WRAPPER_STRING > ~/.bash_login
-    source ~/.bash_login
+  log "Installing kindness"
+  if [[ ! -d $HOME/.kindness ]]; then
+    cd $HOME && git clone https://github.com/seryl/kindness.git .kindness
   else
-    if [ -z $(cat ~/.bash_login | grep $VIRTUALENV_WRAPPER_STRING) ]; then
-      $VIRTUALENV_WRAPPER_STRING >> ~/.bash_login
-      source ~/.bash_login
-    fi
+    cd $HOME/.kindness && git pull
+  fi
+
+  KINDNESS_PATH='PATH=$PATH:$HOME/.kindness/bin'
+  if [[ -z $(cat $RVM_SHELL_RC | grep kindness | awk '{ print $1 }') ]]; then
+    echo "$KINDNESS_PATH # Add kindness to PATH" >> $RVM_SHELL_RC
+    echo "" >> $RVM_SHELL_RC
   fi
 }
 
+# install_virtualbox()
+# {
+#   VBOX_LOCATION=$(which VirtualBox)
+#   VBOX_VERSION=$(curl -sL http://download.virtualbox.org/virtualbox/LATEST.TXT)
+#   VBOX_MVERSION=$(echo $VBOX_VERSION | awk 'BEGIN { FS="." } ; { print $1"."$2 }' )
+#   VBOXURL="http://download.virtualbox.org/virtualbox/$VBOX_VERSION"
+# 
+#   if [[ $PLATFORM == 'Darwin' ]] && [ -z $VBOX_LOCATION ]; then
+#     log 'Downloading Virtualbox'
+#   	DMG=$(curl -sL $VBOXURL/MD5SUMS | grep dmg | awk 'BEGIN { FS="\*" } ; { print $2 }')
+#   	curl -sLO $VBOXURL/$DMG
+#   	DMGMOUNT=$(hdiutil attach $DMG | tail -n1 | awk '{ print $3 }')
+#   	cd $DMGMOUNT
+#   	sudo installer -pkg VirtualBox.mpkg -target "/"
+#   	hdiutil detach $DMGMOUNT
+# 
+#   elif [[ $PLATFORM == 'Linux' ]] && [ -z $VBOX_LOCATION ]; then
+#     log 'Downloading Virtualbox'
+#   	ARCH=$(uname -i)
+#   	RPM=$(curl -sL $VBOXURL/MD5SUMS | grep rhel6 | awk 'BEGIN { FS="\*" } ; { print $2 }' | grep $ARCH)
+#   	$(curl -sLO $VBOXURL/$RPM)
+#   	rpm -i $RPM
+#   	rm $RPM
+#   fi
+# }
+# 
+# install_vagrant()
+# {
+#   check_gem_installed "vagrant"
+#   vagrant_installed=$?
+#   if [ $vagrant_installed -ne 0 ]; then
+#     log 'Downloading Vagrant'
+#     gem install vagrant
+#   fi
+# }
+# 
+# install_veewee()
+# {
+#   check_gem_installed "veewee"
+#   veewee_installed=$?
+#   if [ $veewee_installed -ne 0 ]; then
+#     log 'Downloading Veewee'
+#     gem install veewee
+#   fi
+# }
+# 
+# install_lunchy()
+# {
+#   check_gem_installed "lunchy"
+#   lunchy_installed=$?
+#   if [ $lunchy_installed -ne 0 ]; then
+#     log 'Downloading Lunchy'
+#     gem install lunchy
+#   fi
+# }
+# 
+# install_pip()
+# {
+#   if [ -z $(brew list | grep brew-pip) ]; then
+#     log 'Downloading Python-Pip'
+#     brew install brew-pip
+#   fi
+# }
+# 
+# install_virtualenv()
+# {
+#   VIRTUALENV_INSTALLED=$(pip freeze | grep virtualenv)
+#   if [ -z $VIRTUALENV_INSTALLED ]; then
+#     log 'Installing VirtualEnv'
+#     sudo pip install virtualenv > /dev/null
+#   fi
+# }
+# 
+# install_virtaulenvwrapper()
+# {
+#   VIRTUALENV_WRAPPER_INSTALLED=$(pip freeze | grep virtualenvwrapper)
+#   if [ -z VIRTUALENV_WRAPPER_INSTALLED ]; then
+#     log 'Installing VirtualEnv Wrapper'
+#     sudo pip install virtualenvwrapper > /dev/null
+#   fi
+#   
+#   if [ ! -d ~/.virtualenvs ]; then
+#     mkdir ~/.virtualenvs
+#   fi
+#   
+#   VIRTUALENV_WRAPPER_STRING='source /usr/local/bin/virtualenvwrapper.sh'
+#   if [ ! -f ~/.bash_login ]; then
+#     echo $VIRTUALENV_WRAPPER_STRING > ~/.bash_login
+#     source ~/.bash_login
+#   else
+#     if [ -z $(cat ~/.bash_login | grep $VIRTUALENV_WRAPPER_STRING) ]; then
+#       $VIRTUALENV_WRAPPER_STRING >> ~/.bash_login
+#       source ~/.bash_login
+#     fi
+#   fi
+# }
+
+
+print_shell_notice()
+{
+  case $SHELL in
+    *bash)
+      RVM_SHELL_RC="$HOME/.bash_profile"
+      ;;
+    *zsh)
+      RVM_SHELL_RC="$HOME/.zshrc"
+      ;;
+  esac
+  
+  echo "
+Note:
+  
+  In order for kindness to work you will need to either create a new terminal
+  or \`source $RVM_SHELL_RC\`
+  
+  "
+}
 
 get_ready()
 {
+  check_if_root
   install_brew
   install_git
   install_rvm
   install_ruby19
   install_chef
-  install_virtualbox
-  install_vagrant
-  install_veewee
-  install_lunchy
-  install_pip
-  install_virtualenv
-  install_virtualenvwrapper
+  install_kindness
+  # install_virtualbox
+  # install_vagrant
+  # install_veewee
+  # install_lunchy
+  # install_pip
+  # install_virtualenv
+  # install_virtualenvwrapper
+  print_shell_notice
 }
 
 # Parse CLI arguments.
@@ -209,10 +288,10 @@ do
   case "$token" in
     (--trace)
       set -o xtrace
-      export slipstream_trace_flag=1
+      export kindness_trace_flag=1
       ;;
     (--debug)
-      export slipstream_debug_flag=1
+      export kindness_debug_flag=1
       set -o verbose
       ;;
     (help|usage)
