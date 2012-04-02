@@ -45,6 +45,14 @@ install_brew()
     BREW_URL="https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb"
     /usr/bin/ruby -e "$(/usr/bin/curl -fksSL $BREW_URL)"
   fi
+  brew update
+}
+
+install_automake()
+{
+  log "Installing automake and autoconf"
+  brew install automake > /dev/null 2>&1
+  brew install autoconf > /dev/null 2>&1
 }
 
 install_git()
@@ -267,6 +275,7 @@ get_ready()
 {
   check_if_root
   install_brew
+  install_automake
   install_git
   install_rvm
   install_ruby19
