@@ -28,6 +28,15 @@ check_if_root()
   fi
 }
 
+check_for_xcode()
+{
+  GCC_LOCATION=$(which gcc) || $(cat /dev/null)
+  if [[ -z GCC_LOCATION ]]; then
+    log "Xcode and CLI utilities must be installed before continuing"
+    exit 0
+  fi
+}
+
 check_gem_installed()
 {
   is_installed=$(gem list | grep $1 | awk '{ print $1 }')
@@ -50,10 +59,10 @@ install_brew()
 
 install_automake()
 {
-  log "Installing automake and autoconf"
   for app in automake autoconf
   do
     if [[ -z $(brew list | grep $app) ]]; then
+      log "Installing $app"
       brew install $app > /dev/null 2>&1
     fi
   done
@@ -278,6 +287,7 @@ Note:
 get_ready()
 {
   check_if_root
+  check_for_xcode
   install_brew
   install_automake
   install_git
