@@ -78,8 +78,12 @@ module Kindness
       unless File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
-        DEFAULT_RECIPES.each { |recipe|
-          solo_json << "    \"recipe[#{recipe}]\",\n"
+        DEFAULT_RECIPES.each_with_index { |recipe, i|
+          if DEFAULT_RECIPES.size == (i-1)
+            solo_json << "    \"recipe[#{recipe}]\"\n"
+          else
+            solo_json << "    \"recipe[#{recipe}]\",\n"
+          end
         }
         solo_json << "  ]\n"
         solo_json << "}\n"
