@@ -109,10 +109,13 @@ install_ruby19()
     rvm install $RUBY_VERSION
   fi
   
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
+  PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+  
   RUBY_IS_DEFAULT=$(rvm list | grep "=\\* $RUBY_VERSION" | awk '{ print $2 }')
   if [ -z $RUBY_IS_DEFAULT ]; then
     log "Setting rvm default to $RUBY_VERSION"
-    ln -sfn "$HOME/.rvm/wrappers/$RUBY_VERSION" "$HOME/.rvm/wrappers/default"
+    rvm use --default $RUBY_VERSION
   fi
 }
 
@@ -269,13 +272,6 @@ get_ready()
   install_ruby19
   install_chef
   install_kindness
-  # install_virtualbox
-  # install_vagrant
-  # install_veewee
-  # install_lunchy
-  # install_pip
-  # install_virtualenv
-  # install_virtualenvwrapper
   print_shell_notice
 }
 
