@@ -2,9 +2,8 @@ module Kindness
   class Application
     include Mixlib::CLI
     
-    DEFAULT_RECIPES = [
-      'virtualbox', 'vagrant', 'veewee',
-      'pip', 'virtualenv', 'virtualenvwrapper' ]
+    # Adding sane default installs for any development environment.
+    DEFAULT_RECIPES = [ 'virtualbox', 'vagrant', 'veewee' ]
     
     banner "usage: kindness (options)"
     
@@ -22,7 +21,14 @@ module Kindness
       long:  "--implode",
       description: "Removes the kindness installation completely.",
       boolean: true,
-      proc: lambda { |imp| puts imp },
+      proc: lambda { |imp|
+        puts "Are you SURE you want to completely remove kindness?"
+        print "This will recursively remove #{kindness_dir} [y/n]: "
+        case gets.strip
+        when 'Y', 'y'
+          FileUtils.rm_rf kindness_dir
+        end
+      },
       exit: 0
     
     option :version,
@@ -33,6 +39,7 @@ module Kindness
       proc: lambda { |v| puts "kindness: #{::Kindness::VERSION}" },
       exit: 0
     
+    # Run kindness... kindly?
     def run
       parse_options
       check_platform
@@ -40,20 +47,24 @@ module Kindness
       check_solo_json
     end
     
+    # Englishing home directory.
     def user_home_dir
       Etc.getpwuid.dir
     end
     
+    # Englishing kindness directory.
     def kindness_dir
       "#{user_home_dir}/.kindness"
     end
     
+    # Adds lunchy to the default recipes if the operating system is OSX.
     def check_platform
       if RUBY_PLATFORM =~ /darwin/
         DEFAULT_RECIPES << "lunchy"
       end
     end
     
+    # Sets up the default config.rb for chef-solo.
     def check_config_rb
       config_file = "#{kindness_dir}/config.rb"
       if !File.exists? config_file
@@ -65,6 +76,7 @@ module Kindness
       end
     end
     
+    # Sets up the default solo.json for chef-solo.
     def check_solo_json
       solo_file = "#{kindness_dir}/solo.json"
       if !File.exists? solo_file
@@ -79,5 +91,6 @@ module Kindness
           f.write(solo_json) }
       end
     end
+    
   end
 end
