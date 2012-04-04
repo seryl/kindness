@@ -48,17 +48,9 @@ module Kindness
     # Run kindness... kindly?
     def run
       parse_options
-      check_platform
       check_config_rb
       check_solo_json
       run_chef_solo
-    end
-    
-    # Adds lunchy to the default recipes if the operating system is OSX.
-    def check_platform
-      if RUBY_PLATFORM =~ /darwin/
-        DEFAULT_RECIPES << "lunchy"
-      end
     end
     
     # Sets up the default config.rb for chef-solo.
