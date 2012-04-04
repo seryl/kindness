@@ -22,9 +22,12 @@ module Kindness
       description: "Removes the kindness installation completely.",
       boolean: true,
       proc: lambda { |imp|
-        puts "Are you SURE you want to completely remove kindness?"
-        print "This will recursively remove #{Kindness.kindness_dir} [y/n]: "
-        case gets.strip
+        trap("INT") { exit 0 }
+        puts  "Are you SURE you want to completely remove kindness?"
+        puts
+        puts  "This will recursively remove #{Kindness.kindness_dir} and all associated recipes"
+        print "[y/n]: "
+        case $stdin.gets.chomp
         when 'Y', 'y'
           FileUtils.rm_rf Kindness.kindness_dir
         end
