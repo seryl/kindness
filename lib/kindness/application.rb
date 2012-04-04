@@ -79,7 +79,7 @@ module Kindness
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
         DEFAULT_RECIPES.each_with_index { |recipe, i|
-          if DEFAULT_RECIPES.size == (i-1)
+          if (DEFAULT_RECIPES.size - 1) == (i)
             solo_json << "    \"recipe[#{recipe}]\"\n"
           else
             solo_json << "    \"recipe[#{recipe}]\",\n"
@@ -94,7 +94,7 @@ module Kindness
     
     # Run the chef-solo application with the config.rb and solo.json.
     def run_chef_solo
-      response = %x[ chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json ]
+      response = `sudo chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json`
       response.each { |line| puts line }
     end
     
