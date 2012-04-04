@@ -116,9 +116,9 @@ install_rvm()
     fi
   done
   
-  if [[ -s "$HOME/.rvm/script/rvm" ]]; then
-    source "$HOME/.rvm/scripts/rvm"
-  fi
+  # [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
+  # PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+  # rvm reload
 }
 
 install_ruby19()
@@ -152,12 +152,22 @@ install_chef()
 
 install_kindness()
 {
-  log "Installing kindness"
   if [[ ! -d $HOME/.kindness ]]; then
+    log "Installing kindness"
     cd $HOME && git clone https://github.com/seryl/kindness.git .kindness
   else
+    log "Updating kindness"
     cd $HOME/.kindness && git pull
   fi
+  
+  case $SHELL in
+    *bash)
+      RVM_SHELL_RC="$HOME/.bash_profile"
+      ;;
+    *zsh)
+      RVM_SHELL_RC="$HOME/.zshrc"
+      ;;
+  esac
 
   KINDNESS_PATH='PATH=$PATH:$HOME/.kindness/bin'
   if [[ -z $(cat $RVM_SHELL_RC | grep kindness | awk '{ print $1 }') ]]; then
