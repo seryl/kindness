@@ -34,6 +34,7 @@ module Kindness
       exit: 0
     
     def run
+      parse_options
       check_platform
       check_config_rb
       check_solo_json
