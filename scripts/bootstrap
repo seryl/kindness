@@ -31,7 +31,7 @@ check_if_root()
 check_for_xcode()
 {
   GCC_LOCATION=$(which gcc) || $(cat /dev/null)
-  if [[ -z GCC_LOCATION ]]; then
+  if [[ -z $GCC_LOCATION ]]; then
     log "Xcode and CLI utilities must be installed before continuing"
     exit 0
   fi
