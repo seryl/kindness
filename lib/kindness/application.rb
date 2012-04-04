@@ -3,7 +3,10 @@ module Kindness
     include Mixlib::CLI
     
     # Adding sane default installs for any development environment.
-    DEFAULT_RECIPES = [ 'homebrew', 'virtualbox', 'vagrant', 'veewee' ]
+    DEFAULT_RECIPES = [
+      'homebrew', 'git','lunchy', 
+      'virtualbox', 'vagrant', 'veewee'
+    ]
     
     banner "usage: kindness (options)"
     
