@@ -1,5 +1,6 @@
 module Kindness
   class Application
+    include Utilities
     include Mixlib::CLI
     
     # Adding sane default installs for any development environment.
@@ -45,16 +46,6 @@ module Kindness
       check_platform
       check_config_rb
       check_solo_json
-    end
-    
-    # Englishing home directory.
-    def user_home_dir
-      Etc.getpwuid.dir
-    end
-    
-    # Englishing kindness directory.
-    def kindness_dir
-      "#{user_home_dir}/.kindness"
     end
     
     # Adds lunchy to the default recipes if the operating system is OSX.
