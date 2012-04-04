@@ -1,6 +1,5 @@
 module Kindness
-  module Utilities
-    
+  class << self
     # Englishing home directory.
     def user_home_dir
       Etc.getpwuid.dir
@@ -10,6 +9,5 @@ module Kindness
     def kindness_dir
       "#{user_home_dir}/.kindness"
     end
-    
   end
 end

@@ -1,6 +1,5 @@
 module Kindness
   class Application
-    include Utilities
     include Mixlib::CLI
     
     # Adding sane default installs for any development environment.
@@ -24,7 +23,7 @@ module Kindness
       boolean: true,
       proc: lambda { |imp|
         puts "Are you SURE you want to completely remove kindness?"
-        print "This will recursively remove #{kindness_dir} [y/n]: "
+        print "This will recursively remove #{Kindness.kindness_dir} [y/n]: "
         case gets.strip
         when 'Y', 'y'
           FileUtils.rm_rf kindness_dir
@@ -59,9 +58,9 @@ module Kindness
     def check_config_rb
       config_file = "#{kindness_dir}/config.rb"
       if !File.exists? config_file
-        config_rb = "file_cache_path \"#{kindness_dir}/cache\"\n"
-        config_rb << "cookbook_path [\"#{kindness_dir}/cookbooks\","
-        config_rb << "\"#{kindness_dir}/site-cookbooks\"]\n"
+        config_rb = "file_cache_path \"#{Kindness.kindness_dir}/cache\"\n"
+        config_rb << "cookbook_path [\"#{Kindness.kindness_dir}/cookbooks\","
+        config_rb << "\"#{Kindness.kindness_dir}/site-cookbooks\"]\n"
         File.open(config_file, 'w') { |f|
           f.write(config_rb) }
       end
@@ -69,7 +68,7 @@ module Kindness
     
     # Sets up the default solo.json for chef-solo.
     def check_solo_json
-      solo_file = "#{kindness_dir}/solo.json"
+      solo_file = "#{Kindness.kindness_dir}/solo.json"
       if !File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
