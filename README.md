@@ -13,5 +13,9 @@ Sets up your brew, ruby and python environments in a sane manner.
 ## What do I get?
 
     homebrew, git, rvm, ruby19,
-    chef, Virtualbox, veewee, lunchy,
-    pip, virtualenv, virturalenv wrapper
+    chef, Virtualbox, veewee, lunchy
+
+## Also comes with recipes for...
+
+    pip, virtualenv, virturalenvwrapper
+    
