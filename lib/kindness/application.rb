@@ -48,6 +48,7 @@ module Kindness
       check_platform
       check_config_rb
       check_solo_json
+      run_chef_solo
     end
     
     # Adds lunchy to the default recipes if the operating system is OSX.
@@ -62,8 +63,10 @@ module Kindness
       config_file = "#{Kindness.kindness_dir}/config.rb"
       unless File.exists? config_file
         config_rb = "file_cache_path \"#{Kindness.kindness_dir}/cache\"\n"
-        config_rb << "cookbook_path [\"#{Kindness.kindness_dir}/cookbooks\","
-        config_rb << "\"#{Kindness.kindness_dir}/site-cookbooks\"]\n"
+        config_rb << "cookbook_path ["
+        config_rb << "  \"#{Kindness.kindness_dir}/cookbooks\","
+        config_rb << "  \"#{Kindness.kindness_dir}/site-cookbooks\"\n"
+        config_rb << "]\n"
         File.open(config_file, 'w') { |f|
           f.write(config_rb) }
       end
@@ -83,6 +86,11 @@ module Kindness
         File.open(solo_file, 'w') { |f|
           f.write(solo_json) }
       end
+    end
+    
+    # Run the chef-solo application with the config.rb and solo.json.
+    def run_chef_solo
+      %x[ chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json ]
     end
     
   end
