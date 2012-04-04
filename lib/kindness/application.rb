@@ -26,7 +26,7 @@ module Kindness
         print "This will recursively remove #{Kindness.kindness_dir} [y/n]: "
         case gets.strip
         when 'Y', 'y'
-          FileUtils.rm_rf kindness_dir
+          FileUtils.rm_rf Kindness.kindness_dir
         end
       },
       exit: 0
@@ -56,7 +56,7 @@ module Kindness
     
     # Sets up the default config.rb for chef-solo.
     def check_config_rb
-      config_file = "#{kindness_dir}/config.rb"
+      config_file = "#{Kindness.kindness_dir}/config.rb"
       if !File.exists? config_file
         config_rb = "file_cache_path \"#{Kindness.kindness_dir}/cache\"\n"
         config_rb << "cookbook_path [\"#{Kindness.kindness_dir}/cookbooks\","
