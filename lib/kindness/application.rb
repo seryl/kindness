@@ -60,7 +60,7 @@ module Kindness
     # Sets up the default config.rb for chef-solo.
     def check_config_rb
       config_file = "#{Kindness.kindness_dir}/config.rb"
-      if !File.exists? config_file
+      unless File.exists? config_file
         config_rb = "file_cache_path \"#{Kindness.kindness_dir}/cache\"\n"
         config_rb << "cookbook_path [\"#{Kindness.kindness_dir}/cookbooks\","
         config_rb << "\"#{Kindness.kindness_dir}/site-cookbooks\"]\n"
@@ -72,7 +72,7 @@ module Kindness
     # Sets up the default solo.json for chef-solo.
     def check_solo_json
       solo_file = "#{Kindness.kindness_dir}/solo.json"
-      if !File.exists? solo_file
+      unless File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
         DEFAULT_RECIPES.each { |recipe|
