@@ -17,6 +17,14 @@ module Kindness
       show_options: true,
       exit: 0
     
+    option :implode,
+      short: "-i",
+      long:  "--implode",
+      description: "Removes the kindness installation completely.",
+      boolean: true,
+      proc: lambda { |imp| puts imp },
+      exit: 0
+    
     option :version,
       short: "-v",
       long:  "--version",
