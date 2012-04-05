@@ -1,2 +1,0 @@
-virtualenv and virtualenvwrapper
-================================
