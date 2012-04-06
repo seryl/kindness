@@ -89,8 +89,11 @@ module Kindness
     
     # Run the chef-solo application with the config.rb and solo.json.
     def run_chef_solo
-      response = `chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json`
-      response.split("\n").each { |line| puts line }
+      IO.popen("chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json") do |f|
+        until f.eof?
+          puts f.gets
+        end
+      end
     end
     
   end
