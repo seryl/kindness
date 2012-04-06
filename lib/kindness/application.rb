@@ -8,49 +8,64 @@ module Kindness
       'virtualbox', 'vagrant', 'veewee'
     ]
     
-    banner "usage: kindness (options)"
+    # Default aliases for running kindness commands.
+    DEFAULT_ALIASES = {
+      :change_kindness_site => ['site', 's'],
+      :implode_kindness     => ['implode'],
+      :update_kindness      => ['update', 'up', 'u']
+    }
+    
+    banner """Example usage:
+    kindness update
+    kindness implode
+    kindness site [URL]
+    """
+    
+    option :config_file, 
+      :short => "-c CONFIG",
+      :long  => "--config CONFIG",
+      :default => 'config.rb',
+      :description => "The configuration file to use"
     
     option :help,
-      short: "-h",
-      long:  "--help",
-      description: "Show this message",
-      on: :tail,
-      boolean: true,
-      show_options: true,
-      exit: 0
-    
-    option :implode,
-      short: "-i",
-      long:  "--implode",
-      description: "Removes the kindness installation completely.",
-      boolean: true,
-      proc: lambda { |imp|
-        trap("INT") { exit 0 }
-        puts  "Are you SURE you want to completely remove kindness?"
-        puts
-        puts  "This will recursively remove #{Kindness.kindness_dir} and all associated recipes"
-        print "[y/n]: "
-        case $stdin.gets.chomp
-        when 'Y', 'y'
-          FileUtils.rm_rf Kindness.kindness_dir
-        end
-      },
-      exit: 0
+      :short => "-h",
+      :long  => "--help",
+      :description => "Show this message",
+      :on => :tail,
+      :boolean => true,
+      :show_options => true,
+      :exit => 0
     
     option :version,
-      short: "-v",
-      long:  "--version",
-      description: "Show kindness version",
-      boolean: true,
-      proc: lambda { |v| puts "kindness: #{::Kindness::VERSION}" },
-      exit: 0
+      :short => "-v",
+      :long  => "--version",
+      :description => "Show kindness version",
+      :boolean => true,
+      :proc => lambda { |v| puts "kindness: #{::Kindness::VERSION}" },
+      :exit => 0
     
     # Run kindness... kindly?
     def run
       parse_options
-      check_config_rb
-      check_solo_json
-      run_chef_solo
+      run_commands
+    end
+    
+    def aliases(cmd)
+      DEFAULT_ALIASES.each do |k, v|
+        if v.include?(cmd)
+          return k
+        end
+      end
+      nil
+    end
+    
+    def run_commands
+      if ARGV.size == 0 || aliases(ARGV.first).nil?
+        puts self.opt_parser.help
+        exit 0
+      else
+        send(aliases(ARGV.first).to_sym)
+      end
     end
     
     # Sets up the default config.rb for chef-solo.
@@ -89,7 +104,51 @@ module Kindness
     
     # Run the chef-solo application with the config.rb and solo.json.
     def run_chef_solo
-      IO.popen("chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json") do |f|
+      safe_system "chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json"
+    end
+    
+    def implode_kindness
+      trap("INT") { exit 0 }
+      puts  "Are you SURE you want to completely remove kindness?\n"
+      puts  "This will recursively remove #{Kindness.kindness_dir} and all associated recipes"
+      print "[y/n]: "
+      case $stdin.gets.chomp
+      when 'Y', 'y'
+        FileUtils.rm_rf Kindness.kindness_dir
+      end
+      exit 0
+    end
+    
+    def update_kindness
+      Dir.chdir(Kindness.kindness_dir)
+      git_init_if_necessary
+      check_config_rb
+      check_solo_json
+      run_chef_solo
+    end
+    
+    def change_kindness_site
+      # Dir.chdir(Kindness.kindness_dir)
+      # if Dir['site-cookbooks/.git/*'].empty?
+      #   safe_system ""
+      # end
+    end
+    
+    def git_init_if_necessary
+      if Dir['.git/*'].empty?
+        safe_system "git init"
+        safe_system "git config core.autocrlf false"
+        safe_system "git remote add origin #{Kindness.kindness_url}"
+        safe_system "git fetch origin"
+        safe_system "git reset --hard origin/master"
+      end
+    rescue Exception
+      FileUtils.rm_rf ".git"
+      raise
+    end
+    
+    def safe_system(command)
+      IO.popen(command) do |f|
         until f.eof?
           puts f.gets
         end

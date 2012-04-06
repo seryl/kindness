@@ -54,6 +54,7 @@ install_brew()
     BREW_URL="https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb"
     /usr/bin/ruby -e "$(/usr/bin/curl -fksSL $BREW_URL)"
   fi
+  log 'Updating Homebrew'
   brew update
 }
 
@@ -116,9 +117,9 @@ install_rvm()
     fi
   done
   
-  # [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
-  # PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
-  # rvm reload
+  [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
+  PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+  rvm reload
 }
 
 install_ruby19()
@@ -175,103 +176,6 @@ install_kindness()
     echo "" >> $RVM_SHELL_RC
   fi
 }
-
-# install_virtualbox()
-# {
-#   VBOX_LOCATION=$(which VirtualBox)
-#   VBOX_VERSION=$(curl -sL http://download.virtualbox.org/virtualbox/LATEST.TXT)
-#   VBOX_MVERSION=$(echo $VBOX_VERSION | awk 'BEGIN { FS="." } ; { print $1"."$2 }' )
-#   VBOXURL="http://download.virtualbox.org/virtualbox/$VBOX_VERSION"
-# 
-#   if [[ $PLATFORM == 'Darwin' ]] && [ -z $VBOX_LOCATION ]; then
-#     log 'Downloading Virtualbox'
-#   	DMG=$(curl -sL $VBOXURL/MD5SUMS | grep dmg | awk 'BEGIN { FS="\*" } ; { print $2 }')
-#   	curl -sLO $VBOXURL/$DMG
-#   	DMGMOUNT=$(hdiutil attach $DMG | tail -n1 | awk '{ print $3 }')
-#   	cd $DMGMOUNT
-#   	sudo installer -pkg VirtualBox.mpkg -target "/"
-#   	hdiutil detach $DMGMOUNT
-# 
-#   elif [[ $PLATFORM == 'Linux' ]] && [ -z $VBOX_LOCATION ]; then
-#     log 'Downloading Virtualbox'
-#   	ARCH=$(uname -i)
-#   	RPM=$(curl -sL $VBOXURL/MD5SUMS | grep rhel6 | awk 'BEGIN { FS="\*" } ; { print $2 }' | grep $ARCH)
-#   	$(curl -sLO $VBOXURL/$RPM)
-#   	rpm -i $RPM
-#   	rm $RPM
-#   fi
-# }
-# 
-# install_vagrant()
-# {
-#   check_gem_installed "vagrant"
-#   vagrant_installed=$?
-#   if [ $vagrant_installed -ne 0 ]; then
-#     log 'Downloading Vagrant'
-#     gem install vagrant
-#   fi
-# }
-# 
-# install_veewee()
-# {
-#   check_gem_installed "veewee"
-#   veewee_installed=$?
-#   if [ $veewee_installed -ne 0 ]; then
-#     log 'Downloading Veewee'
-#     gem install veewee
-#   fi
-# }
-# 
-# install_lunchy()
-# {
-#   check_gem_installed "lunchy"
-#   lunchy_installed=$?
-#   if [ $lunchy_installed -ne 0 ]; then
-#     log 'Downloading Lunchy'
-#     gem install lunchy
-#   fi
-# }
-# 
-# install_pip()
-# {
-#   if [ -z $(brew list | grep brew-pip) ]; then
-#     log 'Downloading Python-Pip'
-#     brew install brew-pip
-#   fi
-# }
-# 
-# install_virtualenv()
-# {
-#   VIRTUALENV_INSTALLED=$(pip freeze | grep virtualenv)
-#   if [ -z $VIRTUALENV_INSTALLED ]; then
-#     log 'Installing VirtualEnv'
-#     sudo pip install virtualenv > /dev/null
-#   fi
-# }
-# 
-# install_virtaulenvwrapper()
-# {
-#   VIRTUALENV_WRAPPER_INSTALLED=$(pip freeze | grep virtualenvwrapper)
-#   if [ -z VIRTUALENV_WRAPPER_INSTALLED ]; then
-#     log 'Installing VirtualEnv Wrapper'
-#     sudo pip install virtualenvwrapper > /dev/null
-#   fi
-#   
-#   if [ ! -d ~/.virtualenvs ]; then
-#     mkdir ~/.virtualenvs
-#   fi
-#   
-#   VIRTUALENV_WRAPPER_STRING='source /usr/local/bin/virtualenvwrapper.sh'
-#   if [ ! -f ~/.bash_login ]; then
-#     echo $VIRTUALENV_WRAPPER_STRING > ~/.bash_login
-#     source ~/.bash_login
-#   else
-#     if [ -z $(cat ~/.bash_login | grep $VIRTUALENV_WRAPPER_STRING) ]; then
-#       $VIRTUALENV_WRAPPER_STRING >> ~/.bash_login
-#       source ~/.bash_login
-#     fi
-#   fi
-# }
 
 
 print_shell_notice()

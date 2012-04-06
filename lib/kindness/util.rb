@@ -9,5 +9,10 @@ module Kindness
     def kindness_dir
       "#{user_home_dir}/.kindness"
     end
+    
+    # Englishing kindness url.
+    def kindness_url
+      "https://github.com/seryl/kindness.git"
+    end
   end
 end
