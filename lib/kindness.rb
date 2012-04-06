@@ -1,3 +1,5 @@
+$stdout.sync = true
+
 require 'mixlib/cli'
 require 'etc'
 require 'fileutils'
