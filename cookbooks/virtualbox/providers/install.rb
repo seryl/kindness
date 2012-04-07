@@ -51,9 +51,6 @@ action :remove do
   end
 end
 
-action :upgrade do
-end
-
 def candidate_version
   @candidate_version ||= begin
     @new_resource.version || latest_virtualbox_version
@@ -72,8 +69,8 @@ end
 
 def current_virtualbox_version
   execute 'get local virtualbox version' do
-    command 'VboxManage --version'
-  end.to_s.split("r").first.to_s
+    command 'VBoxManage --version'
+  end.to_s.split("r").first.to_s.chomp
 end
 
 def latest_virtualbox_version
