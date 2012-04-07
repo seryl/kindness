@@ -71,18 +71,16 @@ end
 # Creates a list of the current md5sums and their associated files
 def virtualbox_md5sum_list
   vbox_md5list = open("#{virtualbox_download_folder}/MD5SUMS").read.split("\n")
-  vbox_md5list.map { |line|
+  vbox_md5list.map do |line|
     md5, file = line.split(' *')
     { 'md5' => md5, 'file' => file }
-  }
+  end
 end
 
 # Takes a list of arguments and runs them as  a filter against the md5list
 def virtualbox_url_for_platform(*args)
   md5list = virtualbox_md5sum_list
-  args.each do |arg|
-    md5list.select! { |h| h['file'].downcase =~ /#{arg}/ }
-  end
+  args.each { |arg| md5list.select! { |h| h['file'].downcase =~ /#{arg}/ } }
   md5list.first['file'] unless md5list.empty?
 end
 
