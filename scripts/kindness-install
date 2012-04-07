@@ -15,7 +15,18 @@ usage()
   printf "%b" "
 Usage:
 
-  ./bootstrap
+  kindness-installer [options] [action]
+
+Options
+
+  [--]branch    <name> - Install kindness head, from named branch
+  --trace              - used to debug the installer script
+
+Actions
+
+  master - Install kindness master branch from seryl kindness repo (Default).
+  stable - Install kindness stable branch from seryl kindness repo.
+  help   - Display CLI help (this output)
 
 "
 }
@@ -55,7 +66,7 @@ install_brew()
     /usr/bin/ruby -e "$(/usr/bin/curl -fksSL $BREW_URL)"
   fi
   log 'Updating Homebrew'
-  brew update
+  brew update | grep -v 'stty: stdin'
 }
 
 install_automake()
