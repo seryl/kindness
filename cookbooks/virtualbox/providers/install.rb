@@ -36,7 +36,7 @@ action :install do
   #   install_version = candidate_version
   # end
   
-  Chef::Log.info "Install Version: #{install_version}"
+  Chef::Log.info "Install Version: #{candidate_version}"
   
   # Chef::Log.info 'Downloading Virtualbox'
   # case node['platform']
