@@ -4,7 +4,7 @@ module Kindness
     
     # Adding sane default installs for any development environment.
     DEFAULT_RECIPES = [
-      'homebrew', 'git','lunchy', 
+      'dmg', 'homebrew', 'git','lunchy', 
       'virtualbox', 'vagrant', 'veewee'
     ]
     
