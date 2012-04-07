@@ -5,7 +5,7 @@ require 'etc'
 require 'fileutils'
 
 module Kindness
-  VERSION = "0.0.1"
+  VERSION = File.open(File.join(File.dirname(__FILE__), '..', 'VERSION')).read
 end
 
 require 'kindness/util'
