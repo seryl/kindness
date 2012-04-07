@@ -38,9 +38,7 @@ action :install do
     timeout = @new_resource.timeout
   end
   
-  return if install_version == current_virtualbox_version
-  Chef::Log.info "LATEST: #{install_version.inspect}"
-  Chef::Log.info "CURRENT: #{current_virtualbox_version.inspect}"
+  next if install_version == current_virtualbox_version
   Chef::Log.info "Installing Virtualbox Version: #{install_version}"
   install_virtualbox
 end
@@ -60,9 +58,8 @@ def candidate_version
 end
 
 def virtualbox_location
-   execute 'find virtualbox installation' do
-     command 'which virtualbox'
-   end.to_s.chomp
+  p = shell_out!('which virtualbox')
+  p.stdout.to_s.strip
 end
 
 def virtualbox_installed?
@@ -70,13 +67,12 @@ def virtualbox_installed?
 end
 
 def current_virtualbox_version
-  execute 'get local virtualbox version' do
-    command 'VBoxManage --version'
-  end.to_s.split("r").first.to_s.chomp
+  p = shell_out!('VBoxManage --version').stdout
+  p.to_s.split("r").first.to_s.strip
 end
 
 def latest_virtualbox_version
-  open('http://download.virtualbox.org/virtualbox/LATEST.TXT').read.chomp
+  open('http://download.virtualbox.org/virtualbox/LATEST.TXT').read.strip
 end
 
 def virtualbox_download_folder
