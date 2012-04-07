@@ -116,6 +116,7 @@ module Kindness
     def update_kindness
       Dir.chdir(Kindness.kindness_dir)
       git_init_if_necessary
+      safe_system "git pull"
       check_config_rb
       check_solo_json
       run_chef_solo
