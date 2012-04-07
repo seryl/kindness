@@ -28,13 +28,13 @@ action :install do
   Chef::Log.info virtualbox_installed?
   Chef::Log.info virtualbox_md5sum_list.inspect
   
-  # If we specified a version, and it's not the current version, move to the specified version
-  if @new_resource.version != nil && @new_resource.version != @current_resource.version
-    install_version = @new_resource.version
-  # If it's not installed at all, install it
-  elsif @current_resource.version == nil
-    install_version = candidate_version
-  end
+  # # If we specified a version, and it's not the current version, move to the specified version
+  # if @new_resource.version != nil && @new_resource.version != @current_resource.version
+  #   install_version = @new_resource.version
+  # # If it's not installed at all, install it
+  # elsif @current_resource.version == nil
+  #   install_version = candidate_version
+  # end
   
   Chef::Log.info "Install Version: #{install_version}"
   
