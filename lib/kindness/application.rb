@@ -51,11 +51,7 @@ module Kindness
     end
     
     def aliases(cmd)
-      DEFAULT_ALIASES.each do |k, v|
-        if v.include?(cmd)
-          return k
-        end
-      end
+      DEFAULT_ALIASES.each { |k, v| return k if v.include?(cmd) }
       nil
     end
     
@@ -77,8 +73,7 @@ module Kindness
         config_rb << "  \"#{Kindness.kindness_dir}/cookbooks\","
         config_rb << "  \"#{Kindness.kindness_dir}/site-cookbooks\"\n"
         config_rb << "]\n"
-        File.open(config_file, 'w') { |f|
-          f.write(config_rb) }
+        File.open(config_file, 'w') { |f| f.write(config_rb) }
       end
     end
     
@@ -88,17 +83,16 @@ module Kindness
       unless File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
-        DEFAULT_RECIPES.each_with_index { |recipe, i|
+        DEFAULT_RECIPES.each_with_index do |recipe, i|
           if (DEFAULT_RECIPES.size - 1) == (i)
             solo_json << "    \"recipe[#{recipe}]\"\n"
           else
             solo_json << "    \"recipe[#{recipe}]\",\n"
           end
-        }
+        end
         solo_json << "  ]\n"
         solo_json << "}\n"
-        File.open(solo_file, 'w') { |f|
-          f.write(solo_json) }
+        File.open(solo_file, 'w') { |f| f.write(solo_json) }
       end
     end
     
@@ -148,11 +142,7 @@ module Kindness
     end
     
     def safe_system(command)
-      IO.popen(command) do |f|
-        until f.eof?
-          puts f.gets
-        end
-      end
+      IO.popen(command) { |f| puts f.gets until f.eof? }
     end
     
   end
