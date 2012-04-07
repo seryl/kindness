@@ -69,8 +69,8 @@ module Kindness
       config_file = "#{Kindness.kindness_dir}/config.rb"
       unless File.exists? config_file
         config_rb = "file_cache_path \"#{Kindness.kindness_dir}/cache\"\n"
-        config_rb << "cookbook_path ["
-        config_rb << "  \"#{Kindness.kindness_dir}/cookbooks\","
+        config_rb << "cookbook_path [\n"
+        config_rb << "  \"#{Kindness.kindness_dir}/cookbooks\",\n"
         config_rb << "  \"#{Kindness.kindness_dir}/site-cookbooks\"\n"
         config_rb << "]\n"
         File.open(config_file, 'w') { |f| f.write(config_rb) }
