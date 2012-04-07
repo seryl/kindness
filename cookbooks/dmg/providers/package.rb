@@ -3,6 +3,7 @@
 # Provider:: package
 #
 # Copyright 2011, Joshua Timberman
+# Copyright 2012, Josh Toft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,37 +32,47 @@ end
 
 action :install do
   unless @dmgpkg.installed
+    install_pkg
+  end
+end
 
-    volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
-    dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
-    dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
+action :upgrade do
+  install_pkg
+end
 
-    if new_resource.source
-      remote_file dmg_file do
-        source new_resource.source
-        checksum new_resource.checksum if new_resource.checksum
-      end
+def install_pkg
+  volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
+  dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
+  dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
+  
+  unless File.directory? Chef::Config[:file_cache_path]
+    Dir::mkdir(Chef::Config[:file_cache_path])
+  end
+  
+  if new_resource.source
+    remote_file dmg_file do
+      source new_resource.source
+      checksum new_resource.checksum if new_resource.checksum
     end
+  end
 
-    execute "hdid #{dmg_file}" do
-      not_if "hdiutil info | grep -q 'image-path.*#{dmg_file}'"
+  execute "hdid #{dmg_file}" do
+    not_if "hdiutil info | grep -q 'image-path.*#{dmg_file}'"
+  end
+
+  case new_resource.type
+  when "app"
+    execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'"
+  when "mpkg"
+    execute "sudo installer -pkg /Volumes/#{volumes_dir}/#{new_resource.app}.mpkg -target /"
+  end
+
+  execute "hdiutil detach '/Volumes/#{volumes_dir}'"
+
+  if ::File.directory?("#{new_resource.destination}/#{new_resource.app}.app")
+    file "#{new_resource.destination}/#{new_resource.app}.app/Contents/MacOS/#{new_resource.app}" do
+      mode 00755
+      ignore_failure true
     end
-
-    case new_resource.type
-    when "app"
-      execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'"
-    when "mpkg"
-      execute "sudo installer -pkg /Volumes/#{volumes_dir}/#{new_resource.app}.mpkg -target /"
-    end
-
-    execute "hdiutil detach '/Volumes/#{volumes_dir}'"
-
-    if ::File.directory?("#{new_resource.destination}/#{new_resource.app}.app")
-      file "#{new_resource.destination}/#{new_resource.app}.app/Contents/MacOS/#{new_resource.app}" do
-        mode 0755
-        ignore_failure true
-      end
-    end
-
   end
 end

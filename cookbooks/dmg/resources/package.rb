@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-actions :install
+actions :install, :upgrade
 
 attribute :app, :kind_of => String, :name_attribute => true
 attribute :source, :kind_of => String, :default => nil
@@ -27,8 +27,3 @@ attribute :dmg_name, :kind_of => String, :default => nil
 attribute :type, :kind_of => String, :default => "app"
 attribute :installed, :kind_of => [TrueClass, FalseClass], :default => false
 attribute :installed_resource, :kind_of => String, :default => nil
-
-def initialize(name, run_context=nil)
-  super
-  @action = :install
-end
