@@ -15,7 +15,7 @@ usage()
   printf "%b" "
 Usage:
 
-  kindness-installer [options] [action]
+  kindness-install [options] [action]
 
 Options
 
@@ -50,11 +50,7 @@ check_for_xcode()
 
 check_gem_installed()
 {
-  is_installed=$(gem list | grep $1 | awk '{ print $1 }')
-  if [ -z $is_installed ]; then
-    return 1
-  fi
-  return 0
+  gem_installed=$(gem list | grep $1 | awk '{ print $1 }')
 }
 
 install_brew()
@@ -155,8 +151,7 @@ install_ruby19()
 install_chef()
 {
   check_gem_installed "chef"
-  chef_installed=$?
-  if [[ $chef_installed -ne 0 ]]; then
+  if [ -z $gem_installed ]; then
     log 'Downloading Chef'
     gem install chef
   fi
