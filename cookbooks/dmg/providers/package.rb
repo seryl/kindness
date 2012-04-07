@@ -44,10 +44,7 @@ def install_pkg
   volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
   dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
   dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
-  
-  unless File.directory? Chef::Config[:file_cache_path]
-    Dir::mkdir(Chef::Config[:file_cache_path])
-  end
+  directory Chef::Config[:file_cache_path]
   
   if new_resource.source
     remote_file dmg_file do
