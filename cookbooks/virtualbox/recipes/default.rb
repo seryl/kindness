@@ -18,26 +18,8 @@
 # limitations under the License.
 #
 
+include_recipe "dmg"
+
 virtualbox_install "latest" do
   action :install
 end
-
-# unless virtualbox_installed?
-#   download_virtualbox
-#   install_virtualbox
-# end
-#   
-#   case node['platform']
-#   when "mac_os_x"
-#     # DMG=$(curl -sL $VBOXURL/MD5SUMS | grep dmg | awk 'BEGIN { FS="\*" } ; { print $2 }')
-#     # curl -sLO $VBOXURL/$DMG
-#   else
-#     # Chef::Log.info 'Downloading Virtualbox'
-#     # arch = node['kernel']['machine']
-#     # 
-#     # RPM=$(curl -sL $VBOXURL/MD5SUMS | grep rhel6 | awk 'BEGIN { FS="\*" } ; { print $2 }' | grep $ARCH)
-#     # $(curl -sLO $VBOXURL/$RPM)
-#     # rpm -i $RPM
-#     # rm $RPM
-#   end
-# end

@@ -24,26 +24,34 @@ require 'chef/mixin/language'
 include Chef::Mixin::ShellOut
 
 action :install do
-  Chef::Log.info virtualbox_location
-  Chef::Log.info virtualbox_installed?
-  Chef::Log.info virtualbox_md5sum_list.inspect
   
-  # # If we specified a version, and it's not the current version, move to the specified version
-  # if @new_resource.version != nil && @new_resource.version != @current_resource.version
-  #   install_version = @new_resource.version
-  # # If it's not installed at all, install it
-  # elsif @current_resource.version == nil
-  #   install_version = candidate_version
-  # end
+  install_version = nil
+  if @new_resource.version
+    install_version ||= @new_resource.version
+  else
+    install_version ||= candidate_version
+  end
   
-  Chef::Log.info "Install Version: #{candidate_version}"
+  # Set the timeout (units in seconds)
+  timeout = 900
+  if @new_resource.timeout
+    timeout = @new_resource.timeout
+  end
   
-  # Chef::Log.info 'Downloading Virtualbox'
-  # case node['platform']
-  # when "mac_os_x"
-  #   
-  # else
-  # end
+  return if install_version == current_virtualbox_version
+  Chef::Log.info "Installing Virtualbox Version: #{install_version}"
+  install_virtualbox
+end
+
+action :remove do
+  # Set the timeout (units in seconds)
+  timeout = 900
+  if @new_resource.timeout
+    timeout = @new_resource.timeout
+  end
+end
+
+action :upgrade do
 end
 
 def candidate_version
@@ -53,11 +61,19 @@ def candidate_version
 end
 
 def virtualbox_location
-   execute('which virtualbox').to_s.chomp
+   execute 'find virtualbox installation' do
+     command 'which virtualbox'
+   end.to_s.chomp
 end
 
 def virtualbox_installed?
   virtualbox_location.empty?
+end
+
+def current_virtualbox_version
+  execute 'get local virtualbox version' do
+    command 'VboxManage --version'
+  end.to_s.split("r").first.to_s
 end
 
 def latest_virtualbox_version
@@ -78,175 +94,28 @@ def virtualbox_md5sum_list
 end
 
 # Takes a list of arguments and runs them as  a filter against the md5list
-def virtualbox_url_for_platform(*args)
+def virtualbox_for_platform(*args)
   md5list = virtualbox_md5sum_list
   args.each { |arg| md5list.select! { |h| h['file'].downcase =~ /#{arg}/ } }
-  md5list.first['file'] unless md5list.empty?
+  md5list
 end
 
-# define :install_virtualbox do
-#   Chef::Log.info 'Installing Virtualbox'
-#   case node['platform']
-#   when "mac_os_x"
-#     execute "mount virtualbox" do
-#       command = "hdiutil attach #{_my_dmg_location_} | tail -n 1 | awk '{ print $3 }'"
-#       action :run
-#     end
-#     
-#     execute "install virtualbox" do
-#       command "installer -pkg VirtualBox.mpkg -target "/""
-#       cwd "#{path_do_dmg_location}"
-#       action :run
-#     end
-#     
-#     execute "unmount virtualbox" do
-#       command "hdiutil detach #{path_to_dmg_location}"
-#       action :run
-#     end
-#   else
-#   end
-# end
+def install_virtualbox
+  case node['platform']
+  when "mac_os_x"
+    install_osx
+  else
+  end
+end
 
 
-
-#   # If we specified a version, and it's not the current version, move to the specified version
-#   if @new_resource.version != nil && @new_resource.version != @current_resource.version
-#     install_version = @new_resource.version
-#   # If it's not installed at all, install it
-#   elsif @current_resource.version == nil
-#     install_version = candidate_version
-#   end
-#   
-#   # Set the timeout (units in seconds)
-#   timeout = 900
-#   if @new_resource.timeout
-#     timeout = @new_resource.timeout
-#   end
-#   
-#   if install_version
-#     Chef::Log.info("Installing #{@new_resource} version #{install_version}")
-#     status = install_package(@new_resource.package_name, install_version, timeout)
-#     if status
-#       @new_resource.updated_by_last_action(true)
-#     end
-#   end
-# end
-# 
-# action :upgrade do
-# end
-# 
-# action :remove do
-# end
-# 
-# action :upgrade do
-#   # Set the timeout (units in seconds)
-#   timeout = 900
-#   if @new_resource.timeout
-#     timeout = @new_resource.timeout
-#   end
-# 
-#   if @current_resource.version != candidate_version
-#     orig_version = @current_resource.version || "uninstalled"
-#     Chef::Log.info("Upgrading #{@new_resource} version from #{orig_version} to #{candidate_version}")
-#     status = upgrade_package(@new_resource.package_name, candidate_version, timeout)
-#     if status
-#       @new_resource.updated_by_last_action(true)
-#     end
-#   end
-# end
-# 
-# action :remove do
-#   # Set the timeout (units in seconds)
-#   timeout = 900
-#   if @new_resource.timeout
-#     timeout = @new_resource.timeout
-#   end
-# 
-#   if removing_package?
-#     Chef::Log.info("Removing #{@new_resource}")
-#     remove_package(@current_resource.package_name, @new_resource.version, timeout)
-#     @new_resource.updated_by_last_action(true)
-#   else
-#   end
-# end
-# 
-# def removing_package?
-#   if @current_resource.version.nil?
-#     false # nothing to remove
-#   elsif @new_resource.version.nil?
-#     true # remove any version of a package
-#   elsif @new_resource.version == @current_resource.version
-#     true # remove the version we have
-#   else
-#     false # we don't have the version we want to remove
-#   end
-# end
-# 
-# def expand_options(options)
-#   options ? " #{options}" : ""
-# end
-# 
-# # these methods are the required overrides of 
-# # a provider that extends from Chef::Provider::Package 
-# # so refactoring into core Chef should be easy
-# 
-# def load_current_resource
-#   @current_resource = Chef::Resource::PythonPip.new(@new_resource.name)
-#   @current_resource.package_name(@new_resource.package_name)
-#   @current_resource.version(nil)
-#   
-#   unless current_installed_version.nil?
-#     @current_resource.version(current_installed_version)
-#   end
-#   
-#   @current_resource
-# end
-# 
-# def current_installed_version
-#   @current_installed_version ||= begin
-#     delimeter = /==/
-#     
-#     version_check_cmd = "pip freeze#{expand_virtualenv(can_haz_virtualenv(@new_resource))} | grep -i #{@new_resource.package_name}=="
-#     # incase you upgrade pip with pip!
-#     if @new_resource.package_name.eql?('pip')
-#       delimeter = /\s/
-#       version_check_cmd = "pip --version"
-#     end
-#     p = shell_out!(version_check_cmd)
-#     p.stdout.split(delimeter)[1].strip
-#   rescue Chef::Exceptions::ShellCommandFailed
-#   end
-# end
-# 
-# def candidate_version
-#   @candidate_version ||= begin
-#     # `pip search` doesn't return versions yet
-#     # `pip list` may be coming soon: 
-#     # https://bitbucket.org/ianb/pip/issue/197/option-to-show-what-version-would-be
-#     @new_resource.version||'latest'
-#   end
-# end
-# 
-# def install_package(name, version, timeout)
-#   v = "==#{version}" unless version.eql?('latest')
-#   shell_out!("pip install#{expand_options(@new_resource.options)}#{expand_virtualenv(can_haz_virtualenv(@new_resource))} #{name}#{v}", :timeout => timeout)
-# end
-# 
-# def upgrade_package(name, version, timeout)
-#   v = "==#{version}" unless version.eql?('latest')
-#   shell_out!("pip install --upgrade#{expand_options(@new_resource.options)}#{expand_virtualenv(can_haz_virtualenv(@new_resource))} #{@new_resource.name}#{v}", :timeout => timeout)
-# end
-# 
-# def remove_package(name, version, timeout)
-#   shell_out!("pip uninstall -y#{expand_options(@new_resource.options)}#{expand_virtualenv(can_haz_virtualenv(@new_resource))} #{@new_resource.name}", :timeout => timeout)
-# end
-# 
-# def expand_virtualenv(virtualenv)
-#   virtualenv && " --environment=#{virtualenv}"
-# end
-# 
-# # TODO remove when provider is moved into Chef core
-# # this allows PythonPip to work with Chef::Resource::Package
-# def can_haz_virtualenv(nr)
-#   nr.respond_to?("virtualenv") ? nr.virtualenv : nil
-# end
+def install_osx
+  vbox_source = virtualbox_for_platform('osx').first
+  
+  dmg_package "Virtualbox" do
+    source "#{virtualbox_download_folder}/#{vbox_source['file']}"
+    checksum vbox_source['md5']
+    type "mpkg"
+    action :upgrade
+  end
+end
