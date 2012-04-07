@@ -39,6 +39,8 @@ action :install do
   end
   
   return if install_version == current_virtualbox_version
+  Chef::Log.info "LATEST: #{install_version.inspect}"
+  Chef::Log.info "CURRENT: #{current_virtualbox_version.inspect}"
   Chef::Log.info "Installing Virtualbox Version: #{install_version}"
   install_virtualbox
 end
