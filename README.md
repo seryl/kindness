@@ -8,7 +8,7 @@ Sets up your brew, ruby and python environments in a sane manner.
 
 ## Installing
 
-    bash < <(curl -s http://bit.ly/install-kindness)
+    bash < <(curl -s https://bit.ly/install-kindness)
 
 ## What do I get?
 
