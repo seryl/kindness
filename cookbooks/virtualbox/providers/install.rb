@@ -63,7 +63,7 @@ def virtualbox_location
 end
 
 def virtualbox_installed?
-  virtualbox_location.empty?
+  !virtualbox_location.empty?
 end
 
 def current_virtualbox_version
