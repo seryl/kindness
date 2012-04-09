@@ -135,7 +135,7 @@ module Kindness
         puts "No site-cookbooks git repo has been initialized.\n"
         puts "To initialize a site-cookbooks repo type `kindness site [url]`."
       else
-        puts "Current site-cookbooks: #{current_sitecookbooks_url}"
+        puts current_sitecookbooks_url
       end
       exit 0
     end
@@ -144,6 +144,8 @@ module Kindness
       unless File.directory? "site-cookbooks"
         safe_system "git submodule add -f #{url} site-cookbooks"
         safe_system "git submodule init"
+        safe_system "git reset HEAD .gitmodules"
+        safe_system "git reset HEAD site-cookbooks"
       end
     end
     
