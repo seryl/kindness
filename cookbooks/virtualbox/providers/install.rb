@@ -38,7 +38,7 @@ action :install do
     timeout = @new_resource.timeout
   end
   
-  next if install_version == current_virtualbox_version
+  next if (install_version == current_virtualbox_version)
   Chef::Log.info "Installing Virtualbox Version: #{install_version}"
   install_virtualbox
 end
@@ -67,8 +67,12 @@ def virtualbox_installed?
 end
 
 def current_virtualbox_version
-  p = shell_out!('VBoxManage --version').stdout
-  p.to_s.split("r").first.to_s.strip
+  if virtualbox_installed?
+    p = shell_out!('VBoxManage --version').stdout
+    p.to_s.split("r").first.to_s.strip
+  else
+    ''
+  end
 end
 
 def latest_virtualbox_version
