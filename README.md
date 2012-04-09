@@ -17,7 +17,7 @@ Sets up your brew, ruby and python environments in a sane manner.
 
 Also comes with recipes for...
 
-    pip, virtualenv, virturalenvwrapper
+    pip, virtualenv, virtualenvwrapper
     
 
 ## Commands
