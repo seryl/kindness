@@ -41,10 +41,20 @@ check_if_root()
 
 check_for_xcode()
 {
-  GCC_LOCATION=$(which gcc) || $(cat /dev/null)
-  if [[ -z $GCC_LOCATION ]]; then
-    log "Xcode and CLI utilities must be installed before continuing"
-    exit 0
+  if [[ $PLATFORM == 'Darwin' ]]; then
+    GCC_LOCATION=$(which gcc) || $(cat /dev/null)
+    if [[ -z $GCC_LOCATION ]]; then
+      log "Xcode and CLI utilities must be installed before continuing"
+      exit 0
+    fi
+  fi
+}
+
+run_software_update()
+{
+  if [[ $PLATFORM == 'Darwin' ]]; then
+    log 'Running OSX Software update'
+    sudo softwareupdate -i -a
   fi
 }
 
@@ -207,6 +217,7 @@ get_ready()
 {
   check_if_root
   check_for_xcode
+  run_software_update
   install_brew
   install_automake
   install_git
