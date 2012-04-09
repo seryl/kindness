@@ -1,7 +1,7 @@
 # Kindness
 
-* joshtoft.com/kindness
-* github.com/seryl/kindness
+* [joshtoft.com/kindness](https://joshtoft.com/kindness)
+* [github.com/seryl/kindness](https://github.com/seryl/kindness)
 
 A nice way to bootstrap your box (with chef).
 
