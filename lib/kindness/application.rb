@@ -79,7 +79,12 @@ module Kindness
     
     # Sets up the default solo.json for chef-solo.
     def check_solo_json
-      solo_file = "#{Kindness.kindness_dir}/solo.json"
+      if File.exists? "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
+        solo_file = "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
+      else
+        solo_file = "#{Kindness.kindness_dir}/solo.json"
+      end
+      
       unless File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
