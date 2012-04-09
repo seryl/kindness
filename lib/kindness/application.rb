@@ -18,7 +18,7 @@ module Kindness
     banner """Example usage:
     kindness update
     kindness implode
-    kindness site [URL]
+    kindness site [url]
     """
     
     option :config_file, 
@@ -114,7 +114,7 @@ module Kindness
     end
     
     def update_kindness
-      Dir.chdir(Kindness.kindness_dir)
+      cd Kindness.kindness_dir
       git_init_if_necessary
       safe_system "git pull"
       check_config_rb
@@ -123,10 +123,45 @@ module Kindness
     end
     
     def change_kindness_site
-      # Dir.chdir(Kindness.kindness_dir)
-      # if Dir['site-cookbooks/.git/*'].empty?
-      #   safe_system ""
-      # end
+      git_url = (ARGV.size == 2) ? ARGV.last : nil
+      print_site_cookbooks_url_and_exit if git_url.nil?
+      cd Kindness.kindness_dir
+      setup_site_cookbooks(git_url)
+      update_sitecookbooks(git_url)
+    end
+    
+    def print_site_cookbooks_url_and_exit
+      if current_sitecookbooks_url.empty?
+        puts "No site-cookbooks git repo has been initialized.\n"
+        puts "To initialize a site-cookbooks repo type `kindness site [url]`."
+      else
+        puts "Current site-cookbooks: #{current_sitecookbooks_url}"
+      end
+      exit 0
+    end
+    
+    def setup_site_cookbooks(url)
+      unless File.directory? "site-cookbooks"
+        safe_system "git submodule add #{url} site-cookbooks"
+        safe_system "git submodule init"
+      end
+    end
+    
+    def update_sitecookbooks(url)
+      unless url == current_sitecookbooks_url
+        safe_system "rm -rf site-cookbooks"
+        setup_site_cookbooks(url)
+      end
+      safe_system "git submodule update"
+    end
+    
+    def current_sitecookbooks_url
+      if File.exists?('.gitmodules')
+        File.open('.gitmodules').read
+            .split("\n").grep(/url/).first.split("=").last.strip
+      else
+        ''
+      end
     end
     
     def git_init_if_necessary
@@ -140,6 +175,10 @@ module Kindness
     rescue Exception
       FileUtils.rm_rf ".git"
       raise
+    end
+    
+    def cd(directory)
+      Dir.chdir(directory)
     end
     
     def safe_system(command)
