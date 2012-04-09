@@ -142,7 +142,7 @@ module Kindness
     
     def setup_site_cookbooks(url)
       unless File.directory? "site-cookbooks"
-        safe_system "git submodule add #{url} site-cookbooks -f"
+        safe_system "git submodule add -f #{url} site-cookbooks"
         safe_system "git submodule init"
       end
     end
