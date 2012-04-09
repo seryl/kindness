@@ -58,7 +58,7 @@ def candidate_version
 end
 
 def virtualbox_location
-  p = shell_out!('which virtualbox')
+  p = shell_out('which virtualbox')
   p.stdout.to_s.strip
 end
 
