@@ -19,3 +19,19 @@ Also comes with recipes for...
 
     pip, virtualenv, virturalenvwrapper
     
+
+## Commands
+
+Updating kindness
+
+    kindness update
+    
+Adding a personal site-cookbooks repository
+
+    kindness site [url]
+    kindness site https://github.com/seryl/kindness-cookbooks.git
+    
+
+Completely remove kindness
+
+    kindness implode
