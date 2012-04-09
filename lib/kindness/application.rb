@@ -77,14 +77,16 @@ module Kindness
       end
     end
     
+    def solo_file
+      if File.exists? "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
+        "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
+      else
+        "#{Kindness.kindness_dir}/solo.json"
+      end
+    end
+    
     # Sets up the default solo.json for chef-solo.
     def check_solo_json
-      if File.exists? "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
-        solo_file = "#{Kindness.kindness_dir}/site-cookbooks/solo.json"
-      else
-        solo_file = "#{Kindness.kindness_dir}/solo.json"
-      end
-      
       unless File.exists? solo_file
         solo_json = "{\n"
         solo_json << "  \"run_list\": [\n"
@@ -103,7 +105,7 @@ module Kindness
     
     # Run the chef-solo application with the config.rb and solo.json.
     def run_chef_solo
-      safe_system "chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{Kindness.kindness_dir}/solo.json"
+      safe_system "chef-solo -c #{Kindness.kindness_dir}/config.rb -j #{solo_file}"
     end
     
     def implode_kindness
