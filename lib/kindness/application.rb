@@ -68,7 +68,7 @@ module Kindness
     def check_config_rb
       config_file = "#{Kindness.kindness_dir}/config.rb"
       unless File.exists? config_file
-        config_rb << "cache_type \"BasicFile\"\n"
+        config_rb = "cache_type \"BasicFile\"\n"
         config_rb << "cache_options({ :path => \
           \"#{Kindness.kindness_dir}/cache/checksums\" })\n\n"
         config_rb << "sandbox_path \"#{Kindness.kindness_dir}/sandboxes\"\n"
