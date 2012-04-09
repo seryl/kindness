@@ -122,7 +122,7 @@ module Kindness
     
     def update_kindness
       cd Kindness.kindness_dir
-      git_init_if_necessary
+      git_init_if_necessary(Kindness.kindness_url)
       safe_system "git pull"
       check_config_rb
       check_solo_json
@@ -134,7 +134,6 @@ module Kindness
       print_site_cookbooks_url_and_exit if git_url.nil?
       cd Kindness.kindness_dir
       setup_site_cookbooks(git_url)
-      update_sitecookbooks(git_url)
     end
     
     def print_site_cookbooks_url_and_exit
@@ -148,20 +147,24 @@ module Kindness
     end
     
     def setup_site_cookbooks(url)
-      unless File.directory? "site-cookbooks"
-        safe_system "git submodule add -f #{url} site-cookbooks"
-        safe_system "git submodule init"
+      if File.directory? "site-cookbooks"
+        update_sitecookbooks(url)
+      else
+        safe_system "git clone #{url} site-cookbooks"
         safe_system "git reset HEAD .gitmodules"
         safe_system "git reset HEAD site-cookbooks"
       end
     end
     
-    def update_sitecookbooks(url)
+    def update_sitecookbooks(url)      
       unless url == current_sitecookbooks_url
+        cd Kindness.kindness_dir
         safe_system "rm -rf site-cookbooks"
         setup_site_cookbooks(url)
       end
-      safe_system "git submodule update"
+      cd "#{Kindness.kindness_dir}/site-cookbooks"
+      git_init_if_necessary(url)
+      safe_system "git pull"
     end
     
     def current_sitecookbooks_url
@@ -173,11 +176,11 @@ module Kindness
       end
     end
     
-    def git_init_if_necessary
+    def git_init_if_necessary(url)
       if Dir['.git/*'].empty?
         safe_system "git init"
         safe_system "git config core.autocrlf false"
-        safe_system "git remote add origin #{Kindness.kindness_url}"
+        safe_system "git remote add origin #{url}"
         safe_system "git fetch origin"
         safe_system "git reset --hard origin/master"
       end
