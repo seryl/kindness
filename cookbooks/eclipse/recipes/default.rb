@@ -19,6 +19,8 @@
 #
 
 if node['platform'] == 'mac_os_x'
+  directory "/opt"
+  
   bash "install eclipse" do
     cwd "/opt"
     code <<-EOH
