@@ -1,6 +1,6 @@
 #
 # Author:: Josh Toft <joshtoft@gmail.com>
-# Cookbook Name:: lunchy
+# Cookbook Name:: emacs
 # Recipe:: default
 #
 # Copyright 2012, Josh Toft
