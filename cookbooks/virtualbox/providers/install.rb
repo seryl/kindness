@@ -79,7 +79,7 @@ end
 
 def latest_virtualbox_version
   return @latest_version if @latest_version
-  Timeout::timeout(s) {
+  Timeout::timeout(2) {
     @latest_version ||= open(
       'http://download.virtualbox.org/virtualbox/LATEST.TXT').read.strip
   }
