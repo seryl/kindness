@@ -34,5 +34,3 @@ if node['platform'] == 'mac_os_x'
   end
 else
 end
-
-

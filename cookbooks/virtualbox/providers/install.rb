@@ -19,6 +19,7 @@
 #
 
 require 'open-uri'
+require 'timeout'
 require 'chef/mixin/shell_out'
 require 'chef/mixin/language'
 include Chef::Mixin::ShellOut
@@ -38,6 +39,7 @@ action :install do
     timeout = @new_resource.timeout
   end
   
+  next unless latest_virtualbox_version
   next if (install_version == current_virtualbox_version)
   Chef::Log.info "Installing Virtualbox Version: #{install_version}"
   install_virtualbox
@@ -76,7 +78,13 @@ def current_virtualbox_version
 end
 
 def latest_virtualbox_version
-  open('http://download.virtualbox.org/virtualbox/LATEST.TXT').read.strip
+  return @latest_version if @latest_version
+  Timeout::timeout(s) {
+    @latest_version ||= open(
+      'http://download.virtualbox.org/virtualbox/LATEST.TXT').read.strip
+  }
+rescue Timeout::Error
+  @latest_version ||= ''
 end
 
 def virtualbox_download_folder
