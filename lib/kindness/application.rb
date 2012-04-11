@@ -46,6 +46,7 @@ module Kindness
     
     # Run kindness... kindly?
     def run
+      trap("INT") { exit 0 }
       parse_options
       run_commands
     end
