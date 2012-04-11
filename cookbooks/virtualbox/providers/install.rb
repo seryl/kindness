@@ -1,7 +1,7 @@
 #
 # Author:: Josh Toft <joshtoft@gmail.com>
 # Cookbook Name:: virtualbox
-# Provider:: virtualbox
+# Provider:: install
 #
 # Copyright 2012, Josh Toft
 #
