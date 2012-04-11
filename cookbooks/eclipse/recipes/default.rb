@@ -21,12 +21,14 @@
 if node['platform'] == 'mac_os_x'
   directory "/opt"
   
+  http://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/indigo/SR2/eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz&url=
+  
   bash "install eclipse" do
     cwd "/opt"
     code <<-EOH
-    curl -O 'http://mirror.cc.vt.edu/pub/eclipse/technology/epp/downloads/release/indigo/SR2/eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz'
-    tar -C /opt -zxvf eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz
-    rm eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz
+    curl -O 'http://ftp.osuosl.org/pub/eclipse/technology/epp/downloads/release/indigo/SR2/eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz'
+    tar -C /opt -zxvf eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz
+    rm eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz
     EOH
     not_if "ls /opt/eclipse | grep Eclipse"
   end
