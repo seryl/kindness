@@ -84,7 +84,7 @@ def latest_virtualbox_version
       'http://download.virtualbox.org/virtualbox/LATEST.TXT').read.strip
   }
 rescue Timeout::Error
-  @latest_version ||= ''
+  @latest_version ||= nil
 end
 
 def virtualbox_download_folder
