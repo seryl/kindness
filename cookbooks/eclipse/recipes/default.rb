@@ -22,7 +22,7 @@ if node['platform'] == 'mac_os_x'
   bash "install eclipse" do
     cwd "/opt"
     code <<-EOH
-    curl -O http://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/indigo/SR2/eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz&url=http://mirror.cc.vt.edu/pub/eclipse/technology/epp/downloads/release/indigo/SR2/eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz&mirror_id=504
+    curl -O 'http://mirror.cc.vt.edu/pub/eclipse/technology/epp/downloads/release/indigo/SR2/eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz'
     tar -C /opt -zxvf eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz
     rm eclipse-jee-indigo-SR2-macosx-cocoa-x86_64.tar.gz
     EOH
