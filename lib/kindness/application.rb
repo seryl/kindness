@@ -132,6 +132,7 @@ module Kindness
       safe_system "git pull"
       check_config_rb
       check_solo_json
+      update_sitecookbooks(current_sitecookbooks_url)
       run_chef_solo
     end
     
