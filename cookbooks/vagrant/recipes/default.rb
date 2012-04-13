@@ -18,4 +18,7 @@
 # limitations under the License.
 #
 
-gem_package "vagrant"
+# gem_package "vagrant"
+
+directory "#{ENV['HOME']}/vagrant"
+
