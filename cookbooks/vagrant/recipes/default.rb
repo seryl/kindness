@@ -21,4 +21,3 @@
 # gem_package "vagrant"
 
 directory "#{ENV['HOME']}/vagrant"
-
