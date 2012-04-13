@@ -18,6 +18,6 @@
 # limitations under the License.
 #
 
-user ENV['USER'] do
-  shell "/bin/#{node['user']['shell']}"
+bash "change users shell" do
+  command "chsh -s /bin/#{node['user']['shell']}"
 end
