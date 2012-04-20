@@ -177,8 +177,8 @@ module Kindness
     end
     
     def current_sitecookbooks_url
-      if File.exists?('.gitmodules')
-        File.open('.gitmodules').read
+      if File.exists?("#{Kindness.kindness_dir}/site-cookbooks/.git/config")
+        File.open("#{Kindness.kindness_dir}/site-cookbooks/.git/config").read
             .split("\n").grep(/url/).first.split("=").last.strip
       else
         ''
