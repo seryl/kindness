@@ -8,7 +8,7 @@ log()  { printf "%b\n" "$*" ; return $? ; }
 fail() { log "\nError: $*\n" ; exit 1 ; }
 
 PLATFORM=$(uname)
-RUBY_VERSION='ruby-1.9.3-p125'
+RUBY_VERSION='ruby-1.9.3-p320'
 
 usage()
 {
