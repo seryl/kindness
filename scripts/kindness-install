@@ -205,11 +205,15 @@ print_shell_notice()
       ;;
   esac
   
+  if [[ $PLATFORM == 'Darwin' ]]; then
+    echo "source $RVM_SHELL_RC; kindness update" | pbcopy
+  fi
+  
   echo "
 Note:
   
   In order for kindness to work you will need to either create a new terminal
-  or \`source $RVM_SHELL_RC\`
+  or \`source $RVM_SHELL_RC\` (Mac users can just paste.)
   "
 }
 

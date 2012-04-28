@@ -1,3 +1,4 @@
+$:.unshift File.join(File.dirname(__FILE__))
 $stdout.sync = true
 
 require 'mixlib/cli'

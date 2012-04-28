@@ -17,10 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+include_recipe "homebrew"
 
 if node['platform'] == 'mac_os_x'
-  emacs_version = Chef::Provider::Package
-    .new('emacs', nil).candidate_version
+  emacs_version = %x[brew info emacs | awk '/^emacs / { print $2 }'].strip
   
   package "emacs" do
     options "--cocoa"
@@ -33,4 +33,3 @@ if node['platform'] == 'mac_os_x'
 else
   package "emacs"
 end
-
