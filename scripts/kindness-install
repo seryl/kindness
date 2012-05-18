@@ -169,6 +169,18 @@ install_chef()
 
 install_kindness()
 {
+  check_gem_installed "simplecov"
+  if [ -z $gem_installed ]; then
+    log 'Downloading simplecov'
+    gem install simplecov
+  fi
+  
+  check_gem_installed "jeweler"
+  if [ -z $gem_installed ]; then
+    log 'Downloading jeweler'
+    gem install jeweler
+  fi
+  
   if [[ ! -d $HOME/.kindness ]]; then
     log "Installing kindness"
     cd $HOME && git clone https://github.com/seryl/kindness.git .kindness
