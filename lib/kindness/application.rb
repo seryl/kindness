@@ -137,7 +137,9 @@ module Kindness
       safe_system "git pull"
       check_config_rb
       check_solo_json
-      update_sitecookbooks(current_sitecookbooks_url)
+      if File.directory? "#{Kindness.kindness_dir}/site-cookbooks"
+        update_sitecookbooks(current_sitecookbooks_url)
+      end
       run_chef_solo
     end
     
@@ -159,7 +161,7 @@ module Kindness
     end
     
     def setup_site_cookbooks(url)
-      if File.directory? "site-cookbooks"
+      if File.directory? "#{Kindness.kindness_dir}/site-cookbooks"
         update_sitecookbooks(url)
       else
         safe_system "git clone #{url} site-cookbooks"
@@ -180,8 +182,8 @@ module Kindness
     end
     
     def current_sitecookbooks_url
-      if File.exists?('.gitmodules')
-        File.open('.gitmodules').read
+      if File.exists?("#{Kindness.kindness_dir}/site-cookbooks/.git/config")
+        File.open("#{Kindness.kindness_dir}/site-cookbooks/.git/config").read
             .split("\n").grep(/url/).first.split("=").last.strip
       else
         ''

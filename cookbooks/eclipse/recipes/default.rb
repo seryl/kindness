@@ -21,8 +21,6 @@
 if node['platform'] == 'mac_os_x'
   directory "/opt"
   
-  http://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/indigo/SR2/eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz&url=
-  
   bash "install eclipse" do
     cwd "/opt"
     code <<-EOH

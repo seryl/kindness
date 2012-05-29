@@ -1,3 +1,7 @@
 .DS_Store
 .gitmodules
 site-cookbooks
+solo.json
+config.rb
+backup
+cache

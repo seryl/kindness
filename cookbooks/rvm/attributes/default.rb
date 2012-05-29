@@ -20,8 +20,8 @@
 #
 
 # ruby that will get installed and set to `rvm use default`.
-default['rvm']['default_ruby']      = "ruby-1.9.3-p125"
-default['rvm']['user_default_ruby'] = "ruby-1.9.3-p125"
+default['rvm']['default_ruby']      = "ruby-1.9.3-p194"
+default['rvm']['user_default_ruby'] = "ruby-1.9.3-p194"
 
 # list of additional rubies that will be installed
 default['rvm']['rubies']      = []
@@ -42,7 +42,7 @@ default['rvm']['user_gems'] = Hash.new
 default['rvm']['rvmrc']         = Hash.new
 
 # a list of user hashes, each an isolated per-user RVM installation
-default['rvm']['user_installs'] = []
+default['rvm']['user_installs'] = [ ENV['USER'] ]
 
 # system-wide installer options
 default['rvm']['installer_url'] = "https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer"
