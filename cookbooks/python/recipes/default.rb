@@ -28,7 +28,7 @@ python_pkgs = value_for_platform(
   ["freebsd"] => {
     "default" => ["python"]
   },
-  ["mac_osx_x"] => {
+  ["mac_os_x"] => {
     "default" => []
   },
   "default" => ["python","python-dev"]
