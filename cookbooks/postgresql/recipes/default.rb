@@ -23,7 +23,7 @@ package "postgresql"
 
 bash "initialize postgresql database" do
   code <<-EOH
-  /usr/local/bin/initdb /usr/local/var/postgres
+  /usr/local/bin/initdb --locale=en_US.UTF-8 --encoding=UTF8 /usr/local/var/postgres
   EOH
   not_if { ::File.exists? "/usr/local/var/postgres/PG_VERSION"}
 end
