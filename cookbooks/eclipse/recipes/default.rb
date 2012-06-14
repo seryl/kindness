@@ -20,12 +20,17 @@
 
 if node['platform'] == 'mac_os_x'
   
-  bash "install eclipse" do
-    cwd "/opt"
+  bash "setup opt folder" do
     code <<-EOH
     sudo mkdir -p /opt
     sudo chown root:staff /opt
     sudo chmod 02775 /opt
+    EOH
+  end.run_action(:run)
+  
+  bash "install eclipse" do
+    cwd "/opt"
+    code <<-EOH
     curl -O 'http://ftp.osuosl.org/pub/eclipse/technology/epp/downloads/release/indigo/SR2/eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz'
     tar -C /opt -zxvf eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz
     rm eclipse-java-indigo-SR2-macosx-cocoa-x86_64.tar.gz
