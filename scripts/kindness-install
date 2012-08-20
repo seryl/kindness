@@ -68,8 +68,7 @@ install_brew()
   BREW_LOCATION=$(which brew) || $(cat /dev/null)
   if [[ $PLATFORM == 'Darwin' ]] && [ -z $BREW_LOCATION ]; then
     log 'Downloading Homebrew'
-    BREW_URL="https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb"
-    /usr/bin/ruby -e "$(/usr/bin/curl -fksSL $BREW_URL)"
+    /usr/bin/ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)
   fi
   log 'Updating Homebrew'
   brew update | grep -v 'stty: stdin'
