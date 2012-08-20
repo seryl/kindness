@@ -135,6 +135,8 @@ module Kindness
       cd Kindness.kindness_dir
       git_init_if_necessary(Kindness.kindness_url)
       safe_system "git pull"
+      safe_system "git submodule init"
+      safe_system "git submodule update"
       check_config_rb
       check_solo_json
       if File.directory? "#{Kindness.kindness_dir}/site-cookbooks"
