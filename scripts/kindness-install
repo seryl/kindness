@@ -68,7 +68,7 @@ install_brew()
   BREW_LOCATION=$(which brew) || $(cat /dev/null)
   if [[ $PLATFORM == 'Darwin' ]] && [ -z $BREW_LOCATION ]; then
     log 'Downloading Homebrew'
-    /usr/bin/ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)
+    echo ''| /usr/bin/ruby <(curl -fsSkL raw.github.com/mxcl/homebrew/go)
   fi
   log 'Updating Homebrew'
   brew update | grep -v 'stty: stdin'
@@ -110,10 +110,10 @@ install_rvm()
   CURRENT_RVM=$(rvm --version 2> /dev/null| awk '{print $2}' | sed '/^$/d') || $(cat /dev/null)  
   RVM_VERSION=$(curl -s https://raw.github.com/wayneeseguin/rvm/master/VERSION)
   if [[ $RVM_VERSION != $CURRENT_RVM ]]; then
-    bash -s stable < <(curl -s https://raw.github.com/wayneeseguin/rvm/master/binscripts/rvm-installer) > /dev/null 2>&1
+    curl -L get.rvm.io | bash -s stable > /dev/null 2>&1
   fi
   
-  RVM_STRING="[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && . \"$HOME/.rvm/scripts/rvm\""
+  RVM_STRING="[[ -s \"\$HOME/.rvm/scripts/rvm\" ]] && . \"\$HOME/.rvm/scripts/rvm\""
   RVM_PATH='PATH=$PATH:$HOME/.rvm/bin'
   
   BASH_RVM_SHELL_RC="$HOME/.bash_profile"
