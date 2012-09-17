@@ -116,7 +116,6 @@ def install_virtualbox(version)
   end
 end
 
-
 def install_osx(version)
   vbox_source = virtualbox_for_platform(version, 'osx').first
   
