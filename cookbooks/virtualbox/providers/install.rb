@@ -42,7 +42,7 @@ action :install do
   next unless latest_virtualbox_version
   next if (install_version == current_virtualbox_version)
   Chef::Log.info "Installing Virtualbox Version: #{install_version}"
-  install_virtualbox
+  install_virtualbox(install_version)
 end
 
 action :remove do
@@ -87,13 +87,14 @@ rescue Timeout::Error
   @latest_version ||= nil
 end
 
-def virtualbox_download_folder
-  "http://download.virtualbox.org/virtualbox/#{latest_virtualbox_version}"
+def virtualbox_download_folder(version)
+  "http://download.virtualbox.org/virtualbox/#{version}"
 end
 
 # Creates a list of the current md5sums and their associated files
-def virtualbox_md5sum_list
-  vbox_md5list = open("#{virtualbox_download_folder}/MD5SUMS").read.split("\n")
+def virtualbox_md5sum_list(version)
+  md5_url = "#{virtualbox_download_folder(version)}/MD5SUMS"
+  vbox_md5list = open(md5url).read.split("\n")
   vbox_md5list.map do |line|
     md5, file = line.split(' *')
     { 'md5' => md5, 'file' => file }
@@ -101,26 +102,26 @@ def virtualbox_md5sum_list
 end
 
 # Takes a list of arguments and runs them as  a filter against the md5list
-def virtualbox_for_platform(*args)
-  md5list = virtualbox_md5sum_list
+def virtualbox_for_platform(version, *args)
+  md5list = virtualbox_md5sum_list(version)
   args.each { |arg| md5list.select! { |h| h['file'].downcase =~ /#{arg}/ } }
   md5list
 end
 
-def install_virtualbox
+def install_virtualbox(version)
   case node['platform']
   when "mac_os_x"
-    install_osx
+    install_osx(version)
   else
   end
 end
 
 
-def install_osx
-  vbox_source = virtualbox_for_platform('osx').first
+def install_osx(version)
+  vbox_source = virtualbox_for_platform(version, 'osx').first
   
   dmg_package "Virtualbox" do
-    source "#{virtualbox_download_folder}/#{vbox_source['file']}"
+    source "#{virtualbox_download_folder(version)}/#{vbox_source['file']}"
     checksum vbox_source['md5']
     type "mpkg"
     action :upgrade
