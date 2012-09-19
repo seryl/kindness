@@ -94,7 +94,7 @@ end
 # Creates a list of the current md5sums and their associated files
 def virtualbox_md5sum_list(version)
   md5_url = "#{virtualbox_download_folder(version)}/MD5SUMS"
-  vbox_md5list = open(md5url).read.split("\n")
+  vbox_md5list = open(md5_url).read.split("\n")
   vbox_md5list.map do |line|
     md5, file = line.split(' *')
     { 'md5' => md5, 'file' => file }
