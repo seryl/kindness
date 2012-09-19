@@ -20,7 +20,8 @@
 include_recipe "homebrew"
 
 if node['platform'] == 'mac_os_x'
-  emacs_version = %x[brew info emacs | awk '/^emacs / { print $2 }'].strip
+  emacs_version = %x[brew info emacs | awk '/^emacs: / { print $3 }'].strip
+  emacs_version.gsub!(',', '')
   
   package "emacs" do
     options "--cocoa"
