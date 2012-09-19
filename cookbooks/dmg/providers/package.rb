@@ -60,6 +60,8 @@ def install_pkg
   case new_resource.type
   when "app"
     execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'"
+  when "pkg"
+    execute "sudo installer -pkg /Volumes/#{volumes_dir}/#{new_resource.app}.pkg -target /"
   when "mpkg"
     execute "sudo installer -pkg /Volumes/#{volumes_dir}/#{new_resource.app}.mpkg -target /"
   end

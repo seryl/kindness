@@ -122,7 +122,7 @@ def install_osx(version)
   dmg_package "Virtualbox" do
     source "#{virtualbox_download_folder(version)}/#{vbox_source['file']}"
     checksum vbox_source['md5']
-    type "mpkg"
+    type "pkg"
     action :upgrade
   end
 end
