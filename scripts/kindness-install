@@ -8,7 +8,8 @@ log()  { printf "%b\n" "$*" ; return $? ; }
 fail() { log "\nError: $*\n" ; exit 1 ; }
 
 PLATFORM=$(uname)
-RUBY_VERSION='ruby-1.9.3-p392'
+RUBY_RELEASE='p429'
+RUBY_VERSION="ruby-1.9.3-$RUBY_RELEASE"
 
 usage()
 {
@@ -110,7 +111,7 @@ install_rvm()
   CURRENT_RVM=$(rvm --version 2> /dev/null| awk '{print $2}' | sed '/^$/d') || $(cat /dev/null)  
   RVM_VERSION=$(curl -s https://raw.github.com/wayneeseguin/rvm/master/VERSION)
   if [[ $RVM_VERSION != $CURRENT_RVM ]]; then
-    curl -L https://get.rvm.io | bash -s stable --ruby=1.9.3
+    curl -L https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION
   fi
   
   RVM_STRING="[[ -s \"\$HOME/.rvm/scripts/rvm\" ]] && . \"\$HOME/.rvm/scripts/rvm\""
