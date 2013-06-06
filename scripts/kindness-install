@@ -57,9 +57,9 @@ install_xcode_clitools()
   OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
 
   TOOLS=clitools.dmg
-  if [ "$OSX_VERS" -eq 7 ]; then
+  if [[ "$OSX_VERS" -eq 7 ]]; then
     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
-  elif [ "$OSX_VERS" -eq 8 ]; then
+  elif [[ "$OSX_VERS" -eq 8 ]]; then
     DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2013.dmg
   fi
 
@@ -102,18 +102,18 @@ install_automake()
 install_git()
 {
   GIT_LOCATION=$(which git) || $(cat /dev/null)
-  if [ -z $GIT_LOCATION ]; then
+  if [[ -z $GIT_LOCATION ]]; then
     log 'Downloading Git'
     
     if [[ $PLATFORM == 'Darwin' ]]; then
       brew install git
-    elif [ -f /etc/redhat-release ]; then
+    elif [[ -f /etc/redhat-release ]]; then
       sudo yum install -y git
-    elif [ -f /etc/debian_version ]; then
+    elif [[ -f /etc/debian_version ]]; then
       sudo aptitude install -y git
-    elif [ -f /etc/mandrake-release ]; then
+    elif [[ -f /etc/mandrake-release ]]; then
       sudo urpmi install -y git
-    elif [ -f /etc/SuSE-release ]; then
+    elif [[ -f /etc/SuSE-release ]]; then
       sudo zipper install -y git
     fi
   fi
@@ -157,7 +157,7 @@ install_rvm()
 install_ruby19()
 {
   RUBY_INSTALLED=$(rvm list | grep $RUBY_VERSION | awk '{ print $2 }')
-  if [ -z $RUBY_INSTALLED ]; then
+  if [[ -z $RUBY_INSTALLED ]]; then
     log 'Downloading Ruby19'
     echo "gem: --no-ri --no-rdoc" > ~/.gemrc
     rvm install $RUBY_VERSION
@@ -167,7 +167,7 @@ install_ruby19()
   PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
   
   RUBY_IS_DEFAULT=$(rvm list | grep "=\\* $RUBY_VERSION" | awk '{ print $2 }')
-  if [ -z $RUBY_IS_DEFAULT ]; then
+  if [[ -z $RUBY_IS_DEFAULT ]]; then
     log "Setting rvm default to $RUBY_VERSION"
     rvm use --default $RUBY_VERSION
   fi
@@ -176,7 +176,7 @@ install_ruby19()
 install_chef()
 {
   check_gem_installed "chef"
-  if [ -z $gem_installed ]; then
+  if [[ -z $gem_installed ]]; then
     log 'Downloading Chef'
     gem install chef
   fi
@@ -185,7 +185,7 @@ install_chef()
 install_kindness()
 {
   check_gem_installed "simplecov"
-  if [ -z $gem_installed ]; then
+  if [[ -z $gem_installed ]]; then
     log 'Downloading simplecov'
     gem install simplecov
   fi
