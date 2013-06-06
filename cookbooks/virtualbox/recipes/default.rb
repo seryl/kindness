@@ -20,6 +20,6 @@
 
 include_recipe "dmg"
 
-virtualbox_install "4.2.0" do
+virtualbox_install "4.2.12" do
   action :install
 end
