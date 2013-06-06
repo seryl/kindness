@@ -42,14 +42,34 @@ check_if_root()
 
 check_for_xcode_clitools()
 {
-  curl -sLO http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2013.dmg
   if [[ $PLATFORM == 'Darwin' ]]; then
     GCC_LOCATION=$(which gcc) || $(cat /dev/null)
     if [[ -z $GCC_LOCATION ]]; then
-      log "Xcode and CLI utilities must be installed before continuing"
-      exit 0
+      log "Xcode CLI tools are not installed"
+      install_xcode_clitools
     fi
   fi
+}
+
+install_xcode_clitools()
+{
+  log "Installing Xcode CLI tools"
+  OSX_VERS=$(sw_vers -productVersion | awk -F "." '{print $2}')
+
+  TOOLS=clitools.dmg
+  if [ "$OSX_VERS" -eq 7 ]; then
+    DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_lion_april_2013.dmg
+  elif [ "$OSX_VERS" -eq 8 ]; then
+    DMGURL=http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2013.dmg
+  fi
+
+  curl -sL "$DMGURL" -o "$TOOLS"
+  TMPMOUNT=`/usr/bin/mktemp -d /tmp/clitools.XXXX`
+  hdiutil attach "$TOOLS" -mountpoint "$TMPMOUNT"
+  installer -pkg "$(find $TMPMOUNT -name '*.mpkg')" -target /
+  hditil detatch "$TMPMOUNT"
+  rm -rf "$TMPMOUNT"
+  rm "$TOOLS"
 }
 
 check_gem_installed()
@@ -124,6 +144,7 @@ install_rvm()
       echo "$RVM_STRING # Load rvm function" >> $path
       echo "$RVM_PATH # Add rvm to PATH" >> $path
       echo "" >> $path
+      source $path
     fi
   done
   
@@ -190,22 +211,14 @@ install_kindness()
   if [[ -z $(cat $RVM_SHELL_RC | grep kindness | awk '{ print $1 }') ]]; then
     echo "$KINDNESS_PATH # Add kindness to PATH" >> $RVM_SHELL_RC
     echo "" >> $RVM_SHELL_RC
+    source $RVM_SHELL_RC
   fi
 }
 
-
-init_shell_sources()
+update_kindness()
 {
-  case $SHELL in
-    *bash)
-      source $HOME/.bash_profile
-      ;;
-    *zsh)
-      source $HOME/.zshrc
-      ;;
-  esac
-  
-  kindness update | pbcopy
+  kindness update
+  kindness
 }
 
 get_ready()
@@ -219,7 +232,7 @@ get_ready()
   install_ruby19
   install_chef
   install_kindness
-  init_shell_sources
+  update_kindness
 }
 
 # Parse CLI arguments.
