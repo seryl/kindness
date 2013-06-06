@@ -219,6 +219,15 @@ update_kindness()
 {
   kindness update
   kindness
+
+  log ""
+  log "To run kindness: rvm must be sourced: (Mac users can just paste.)"
+  log "    . $RVM_SHELL_RC; kindness"
+  log ""
+
+  if [[ $PLATFORM == 'Darwin' ]]; then
+    echo "source $RVM_SHELL_RC; kindness update\n" | pbcopy
+  fi
 }
 
 get_ready()
