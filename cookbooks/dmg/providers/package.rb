@@ -27,7 +27,15 @@ end
 
 action :install do
   unless @dmgpkg.installed
+    install_pkg
+  end
+end
 
+action :upgrade do
+  install_pkg
+end
+
+def install_pkg
     volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
     dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
     dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
