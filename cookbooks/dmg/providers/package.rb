@@ -48,7 +48,7 @@ def install_pkg
   end
 
   execute "hdid #{dmg_file}" do
-    nof_if "hdiutil info | grep -q 'image-path.^*#{dmg_file}'"
+    not_if "hdiutil info | grep -q 'image-path.^*#{dmg_file}'"
   end
   
   passphrase_cmd = new_resource.dmg_passphrase ? "-passphrase #{new_resource.dmg_passphrase}" : ""
