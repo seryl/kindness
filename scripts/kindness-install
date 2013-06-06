@@ -51,14 +51,6 @@ check_for_xcode()
   fi
 }
 
-run_software_update()
-{
-  if [[ $PLATFORM == 'Darwin' ]]; then
-    log 'Running OSX Software update'
-    sudo softwareupdate -i -a
-  fi
-}
-
 check_gem_installed()
 {
   gem_installed=$(gem list | grep $1 | awk '{ print $1 }')
@@ -109,9 +101,9 @@ install_git()
 install_rvm()
 {
   CURRENT_RVM=$(rvm --version 2> /dev/null| awk '{print $2}' | sed '/^$/d') || $(cat /dev/null)  
-  RVM_VERSION=$(curl -s https://raw.github.com/wayneeseguin/rvm/master/VERSION)
+  RVM_VERSION=$(curl -sL https://raw.github.com/wayneeseguin/rvm/master/VERSION)
   if [[ $RVM_VERSION != $CURRENT_RVM ]]; then
-    curl -L https://get.rvm.io | bash -s stable --ruby=$RUBY_VERSION
+    curl -sL https://get.rvm.io | bash -s stable --autolibs=3 --ruby=$RUBY_VERSION
   fi
   
   RVM_STRING="[[ -s \"\$HOME/.rvm/scripts/rvm\" ]] && . \"\$HOME/.rvm/scripts/rvm\""
@@ -136,6 +128,7 @@ install_rvm()
   
   [[ -s "$HOME/.rvm/scripts/rvm" ]] && . "$HOME/.rvm/scripts/rvm" # Load RVM function
   PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
+  . $HOME/.rvm/scripts/rvm
   rvm reload
 }
 
@@ -200,34 +193,24 @@ install_kindness()
 }
 
 
-print_shell_notice()
+init_shell_sources()
 {
   case $SHELL in
     *bash)
-      RVM_SHELL_RC="$HOME/.bash_profile"
+      source $HOME/.bash_profile
       ;;
     *zsh)
-      RVM_SHELL_RC="$HOME/.zshrc"
+      source $HOME/.zshrc
       ;;
   esac
   
-  if [[ $PLATFORM == 'Darwin' ]]; then
-    echo "source $RVM_SHELL_RC; kindness update" | pbcopy
-  fi
-  
-  echo "
-Note:
-  
-  In order for kindness to work you will need to either create a new terminal
-  or \`source $RVM_SHELL_RC\` (Mac users can just paste.)
-  "
+  kindness update | pbcopy
 }
 
 get_ready()
 {
   check_if_root
   check_for_xcode
-  run_software_update
   install_brew
   install_automake
   install_git
@@ -235,7 +218,7 @@ get_ready()
   install_ruby19
   install_chef
   install_kindness
-  print_shell_notice
+  init_shell_sources
 }
 
 # Parse CLI arguments.
