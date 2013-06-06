@@ -40,8 +40,9 @@ check_if_root()
   fi
 }
 
-check_for_xcode()
+check_for_xcode_clitools()
 {
+  curl -sLO http://devimages.apple.com/downloads/xcode/command_line_tools_for_xcode_os_x_mountain_lion_april_2013.dmg
   if [[ $PLATFORM == 'Darwin' ]]; then
     GCC_LOCATION=$(which gcc) || $(cat /dev/null)
     if [[ -z $GCC_LOCATION ]]; then
@@ -210,7 +211,7 @@ init_shell_sources()
 get_ready()
 {
   check_if_root
-  check_for_xcode
+  check_for_xcode_clitools
   install_brew
   install_automake
   install_git
