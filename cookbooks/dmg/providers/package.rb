@@ -36,48 +36,47 @@ action :upgrade do
 end
 
 def install_pkg
-    volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
-    dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
-    dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
+  volumes_dir = new_resource.volumes_dir ? new_resource.volumes_dir : new_resource.app
+  dmg_name = new_resource.dmg_name ? new_resource.dmg_name : new_resource.app
+  dmg_file = "#{Chef::Config[:file_cache_path]}/#{dmg_name}.dmg"
 
-    remote_file "#{dmg_file} - #{@dmgpkg.name}" do
-      path dmg_file
-      source new_resource.source
-      checksum new_resource.checksum if new_resource.checksum
-      only_if { new_resource.source }
-    end
-
-    execute "hdid #{dmg_file}" do
-      nof_if "hdiutil info | grep -q 'image-path.^*#{dmg_file}'"
-    end
-    
-    passphrase_cmd = new_resource.dmg_passphrase ? "-passphrase #{new_resource.dmg_passphrase}" : ""
-    ruby_block "attach #{dmg_file}" do
-      block do
-        software_license_agreement = system("hdiutil imageinfo #{passphrase_cmd} '#{dmg_file}' | grep -q 'Software License Agreement: true'")
-        raise "Requires EULA Acceptance; add 'accept_eula true' to package resource" if software_license_agreement && !new_resource.accept_eula
-        accept_eula_cmd = new_resource.accept_eula ? "echo Y |" : ""
-        system "#{accept_eula_cmd} hdiutil attach #{passphrase_cmd} '#{dmg_file}'"
-      end
-      not_if "hdiutil info #{passphrase_cmd} | grep -q 'image-path.*#{dmg_file}'"
-    end
-
-    case new_resource.type
-    when "app"
-      execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'" do
-        user new_resource.owner if new_resource.owner
-      end
-
-      file "#{new_resource.destination}/#{new_resource.app}.app/Contents/MacOS/#{new_resource.app}" do
-        mode 0755
-        ignore_failure true
-      end
-    when "mpkg", "pkg"
-      execute "sudo installer -pkg '/Volumes/#{volumes_dir}/#{new_resource.app}.#{new_resource.type}' -target /"
-    end
-
-    execute "hdiutil detach '/Volumes/#{volumes_dir}'"
+  remote_file "#{dmg_file} - #{@dmgpkg.name}" do
+    path dmg_file
+    source new_resource.source
+    checksum new_resource.checksum if new_resource.checksum
+    only_if { new_resource.source }
   end
+
+  execute "hdid #{dmg_file}" do
+    nof_if "hdiutil info | grep -q 'image-path.^*#{dmg_file}'"
+  end
+  
+  passphrase_cmd = new_resource.dmg_passphrase ? "-passphrase #{new_resource.dmg_passphrase}" : ""
+  ruby_block "attach #{dmg_file}" do
+    block do
+      software_license_agreement = system("hdiutil imageinfo #{passphrase_cmd} '#{dmg_file}' | grep -q 'Software License Agreement: true'")
+      raise "Requires EULA Acceptance; add 'accept_eula true' to package resource" if software_license_agreement && !new_resource.accept_eula
+      accept_eula_cmd = new_resource.accept_eula ? "echo Y |" : ""
+      system "#{accept_eula_cmd} hdiutil attach #{passphrase_cmd} '#{dmg_file}'"
+    end
+    not_if "hdiutil info #{passphrase_cmd} | grep -q 'image-path.*#{dmg_file}'"
+  end
+
+  case new_resource.type
+  when "app"
+    execute "cp -R '/Volumes/#{volumes_dir}/#{new_resource.app}.app' '#{new_resource.destination}'" do
+      user new_resource.owner if new_resource.owner
+    end
+
+    file "#{new_resource.destination}/#{new_resource.app}.app/Contents/MacOS/#{new_resource.app}" do
+      mode 0755
+      ignore_failure true
+    end
+  when "mpkg", "pkg"
+    execute "sudo installer -pkg '/Volumes/#{volumes_dir}/#{new_resource.app}.#{new_resource.type}' -target /"
+  end
+
+  execute "hdiutil detach '/Volumes/#{volumes_dir}'"
 end
 
 private
