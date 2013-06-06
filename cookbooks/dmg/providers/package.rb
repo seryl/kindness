@@ -47,6 +47,10 @@ def install_pkg
       only_if { new_resource.source }
     end
 
+    execute "hdid #{dmg_file}" do
+      nof_if "hdiutil info | grep -q 'image-path.^*#{dmg_file}'"
+    end
+    
     passphrase_cmd = new_resource.dmg_passphrase ? "-passphrase #{new_resource.dmg_passphrase}" : ""
     ruby_block "attach #{dmg_file}" do
       block do

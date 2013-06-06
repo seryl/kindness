@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-actions :install
+actions :install, :upgrade
 
 attribute :app, :kind_of => String, :name_attribute => true
 attribute :source, :kind_of => String, :default => nil
@@ -27,6 +27,7 @@ attribute :volumes_dir, :kind_of => String, :default => nil
 attribute :dmg_name, :kind_of => String, :default => nil
 attribute :type, :kind_of => String, :default => "app"
 attribute :installed, :kind_of => [TrueClass, FalseClass], :default => false
+attribute :installed_resource, :kind_of => String, :default => nil
 attribute :package_id, :kind_of => String, :default => nil
 attribute :dmg_passphrase, :kind_of => String, :default => nil
 attribute :accept_eula, :kind_of => [TrueClass, FalseClass], :default => false
