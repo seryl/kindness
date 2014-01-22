@@ -24,7 +24,6 @@ if node['platform'] == 'mac_os_x'
   emacs_version.gsub!(',', '')
   
   package "emacs" do
-    options "--cocoa"
     version emacs_version
   end
   
